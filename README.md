@@ -1,7 +1,3 @@
-Got it. Here’s a tight version.
-
----
-
 # SpecLite Skill
 
 A lightweight system to run projects with **just enough planning + clear execution**.
