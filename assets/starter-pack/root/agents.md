@@ -8,4 +8,4 @@
 - Keep planning docs separate from execution stories.
 - Update `progress.md` when project direction, active work, or status materially changes.
 - Prefer adapting coherent existing conventions over replacing them.
-- Every final task response should include an `Up Next` note with up to 3 recommended next actions.
+- Every completed task response should end with **Up Next** and 1-3 concrete recommended next actions.

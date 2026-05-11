@@ -135,7 +135,7 @@ For existing repos, merge intentionally. Do not duplicate policies or create par
 
 No implementation without a story when the repo uses story management.
 
-For non-trivial work, stories should include lightweight traceability to the upstream plan, step, or canonical document they advance.
+For non-trivial work and small planning work, stories should include lightweight traceability to the upstream plan, step, or canonical document they advance.
 
 Keep traceability story-first and minimal: cite the related path or story ID and one short reason. Do not require trace links for trivial bookkeeping or low-substance admin changes.
 
@@ -143,16 +143,16 @@ For behavior-changing stories, include a compact `Spec Delta` section.
 
 Use `Added`, `Changed`, and `Removed` headings and keep each item to a one-line impact statement. Do not require spec delta for pure refactors, file moves, or bookkeeping-only stories.
 
-Minimum protocol:
+Minimum visible protocol:
 
 1. Start from a story, not an untracked task.
-2. Pull the story from `ready` to `doing` before implementation.
+2. Create or move the story to `doing` before implementation or planning edits.
 3. Update the story metadata and `stories/index.md`.
 4. Make the checkpoint commit when the repo's workflow expects it.
 5. Implement the change.
 6. Verify at the appropriate test level.
 7. Record done evidence, including verification and residual risk.
-8. Move the story to its final status folder.
+8. Move the story to `done` when complete.
 9. Update `stories/index.md` again.
 10. Make the completion commit when the repo's workflow expects it.
 
