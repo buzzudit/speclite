@@ -50,6 +50,29 @@ stories/
   index.md
 ```
 
+Optional modules include bootstrap steps, compliance constraints, design direction, and owner-run AI demo workflows.
+
+---
+
+## Owner-run AI demos
+
+Speclite can scaffold a repeatable owner-run demo pattern for apps you own:
+
+* Hidden owner-demo mode in the app
+* Stable `data-demo-*` targets
+* App-owned `window.__ownerRunDemo` state
+* Live AI narration controlled by the app
+* A local harness that reads browser state and bounds
+* Real OS-level mouse movement, clicks, and scrolling
+
+The rule is strict: browser automation may inspect state and measure targets, but visible actions must come from OS-level input. This is for owner-run demos, not public end-user tours.
+
+Starter files live under:
+
+```
+assets/starter-pack/optional/owner-run-demo/
+```
+
 ---
 
 ## Stories (how work happens)

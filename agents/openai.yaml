@@ -1,4 +1,4 @@
 interface:
   display_name: "Speclite"
-  short_description: "Planning-first project kickoff"
-  default_prompt: "Use $speclite to scaffold a planning-first starter repo for my new project."
+  short_description: "Planning-first project kickoff and lightweight workflow modules"
+  default_prompt: "Use $speclite to scaffold or adapt a lightweight planning-first workflow for my repo."

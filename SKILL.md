@@ -99,6 +99,7 @@ Use these module rules:
 - Bootstrap module: add `planning/bootstrap-plan.md` and `steps/step-01.md` when the user wants ordered milestone execution or when the repo already uses numbered step outputs.
 - Compliance module: add `planning/regulations.md` only for trust-heavy or sensitive projects.
 - Design module: add `planning/design-direction.md` and `design/` guidance when the project has a marketing site, product UX, operational surfaces, or meaningful visual/messaging design work.
+- Owner-run demo module: add `planning/owner-run-demo-workflows.md`, `demos/owner-run-demo-plan.md`, and `prompts/implement-owner-run-demo.md` when the user wants an AI-launched owner demo where AI scripts visible mouse movement, keyboard-style input, clicks, waits, triggers, and live AI narration.
 
 If the user asks for a minimal setup, the safe fallback is core only.
 
@@ -229,6 +230,9 @@ Starter templates live here:
 - `assets/starter-pack/optional/compliance/planning/regulations.md`
 - `assets/starter-pack/optional/bootstrap/planning/bootstrap-plan.md`
 - `assets/starter-pack/optional/bootstrap/steps/step-01.md`
+- `assets/starter-pack/optional/owner-run-demo/planning/owner-run-demo-workflows.md`
+- `assets/starter-pack/optional/owner-run-demo/demos/owner-run-demo-plan.md`
+- `assets/starter-pack/optional/owner-run-demo/prompts/implement-owner-run-demo.md`
 
 Use these as starting points, not immutable output. Replace placeholders such as `{{PROJECT_NAME}}`, `{{PROJECT_TYPE}}`, and `{{PRIMARY_USER}}`.
 
@@ -300,6 +304,45 @@ When verifying design work, use checks that fit the surface:
 - responsive review
 - consistency review against planning docs
 - consistency review against regulatory or trust-boundary docs when applicable
+
+## Owner-Run Demo Module
+
+Use this optional module when the repo needs a repeatable owner-run AI demo workflow, not a public product tour.
+
+Core framing:
+
+> Two-in-One Demo: the demo is launched by AI. The AI scripts the mouse movement, keyboard-style input, clicks, triggers, and waits, while the voiceover is generated live by AI.
+
+Add this module when:
+
+- the app is owned by the team and can expose hidden demo state
+- visible actions must use the real OS cursor
+- live AI narration needs to be synchronized with app workflow state
+- a local owner or AI environment can run a harness script
+
+Do not add this module for arbitrary webpages, a fake pointer overlay, or a public end-user demo feature.
+
+Scaffold from:
+
+- `assets/starter-pack/optional/owner-run-demo/planning/owner-run-demo-workflows.md`
+- `assets/starter-pack/optional/owner-run-demo/demos/owner-run-demo-plan.md`
+- `assets/starter-pack/optional/owner-run-demo/prompts/implement-owner-run-demo.md`
+
+Preserve the boundary:
+
+- App responsibilities: hidden owner-demo mode, `window.__ownerRunDemo`, stable `data-demo-*` targets, narration playback, run state, app-side fake typing when appropriate, and visible app failures.
+- Harness responsibilities: local orchestration, browser state and bounds reads, target re-measurement, OS-level cursor/click/scroll input, waits, aborts, and failure reporting.
+
+Hard rules:
+
+- browser automation may read state, route, readiness, and DOM bounds
+- browser automation must not perform visible clicks
+- visible mouse movement, clicks, and scrolling must come from OS-level input
+- text selectors are too brittle; use explicit `data-demo-*` attributes
+- fake typing is acceptable only when it has real focus, visible caret, character-by-character entry, and natural app state updates
+- live narration must not overlap or be cut off
+
+For macOS, the module recommends Node orchestration plus Python `ctypes`/CoreGraphics events such as `CGEventCreateMouseEvent`, `CGEventCreateScrollWheelEvent`, and `CGEventPost`. Avoid compiled native helpers unless already approved because unsigned binaries may be blocked.
 
 ## Mature Repo Maintenance
 
