@@ -29,6 +29,10 @@ const requiredSkillTerms = [
   'window.__ownerRunDemo',
   'data-demo-*',
   'OS-level input',
+  'app-orchestrated',
+  'harness-orchestrated',
+  'hybrid',
+  'a step is not complete when narration text changes',
   'assets/starter-pack/optional/owner-run-demo/planning/owner-run-demo-workflows.md',
   'assets/starter-pack/optional/owner-run-demo/demos/owner-run-demo-plan.md',
   'assets/starter-pack/optional/owner-run-demo/prompts/implement-owner-run-demo.md',
@@ -42,6 +46,13 @@ const requiredDemoGuideTerms = [
   'CGEventPost',
   'Accessibility permission',
   'Do not use browser JavaScript clicks',
+  'Orchestration Model Contract',
+  'Step Synchronization Contract',
+  'narrationStatus',
+  'actionStatus',
+  'canAdvance',
+  'timingFallback',
+  'Verification proves visible actions happened',
 ]
 
 function read(relativePath) {
@@ -85,9 +96,11 @@ const demoPlan = read('assets/starter-pack/optional/owner-run-demo/demos/owner-r
 for (const heading of [
   '## Demo Summary',
   '## Required Owner Permissions',
+  '## Orchestration Model',
   '## App State Contract',
   '## Stable DOM Target List',
   '## Narration Steps',
+  '## Step Synchronization Contract',
   '## Visible Cursor Actions',
   '## Fake Typing Segments',
   '## Wait Conditions',
@@ -102,8 +115,12 @@ const prompt = read('assets/starter-pack/optional/owner-run-demo/prompts/impleme
 for (const term of [
   'Inspect the target app',
   'Add hidden owner-demo mode',
+  'Choose and document the primary orchestration model',
+  'Step synchronization contract',
+  'Only one narration may be active at a time',
   'Use OS-level input',
   'Use CDP, Playwright, browser APIs, or equivalent only for state and bounds',
+  'Verification proves visible actions happened',
   'Document how to rerun it',
 ]) {
   assert(prompt.includes(term), `Implementation prompt is missing: ${term}`)

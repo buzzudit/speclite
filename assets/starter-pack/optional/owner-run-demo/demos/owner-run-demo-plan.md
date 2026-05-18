@@ -45,6 +45,29 @@ Ending state:
 - Required env vars:
 - Fallback when unavailable:
 
+## Orchestration Model
+
+Primary orchestrator:
+
+- [ ] `app-orchestrated`
+- [ ] `harness-orchestrated`
+- [ ] `hybrid`
+
+Why this model:
+
+Start button semantics:
+
+- [ ] Runs the whole demo
+- [ ] Arms the harness
+- [ ] Begins a hybrid handoff
+- [ ] No visible Start button
+
+Progression owner:
+
+Handoff contract, if hybrid:
+
+Completion signal required before advancing:
+
 ## App State Contract
 
 Window state object:
@@ -56,12 +79,20 @@ window.__ownerRunDemo
 Required fields:
 
 - `ownerDemo`:
+- `orchestrationModel`:
 - `state`:
 - `phase`:
 - `stepId`:
+- `currentStep`:
 - `runId`:
+- `narrationStatus`:
+- `actionStatus`:
+- `canAdvance`:
+- `lastCompletedAction`:
+- `lastCompletedStep`:
 - `route`:
 - `pendingAction`:
+- `timingFallback`:
 - `error`:
 
 ## Stable DOM Target List
@@ -77,6 +108,24 @@ Required fields:
 | Step id | Label | Narration goal | Min step ms | Notes |
 | --- | --- | --- | --- | --- |
 | 01-intro | Intro | | | |
+
+## Step Synchronization Contract
+
+Required invariant:
+
+```ts
+nextStep.narrationStart >= currentStep.narrationComplete
+nextStep.narrationStart >= currentStep.actionComplete
+nextStep.narrationStart >= currentStep.settleComplete
+```
+
+| Step id | Narration owner | Action owner | Advance trigger | Completion signal |
+| --- | --- | --- | --- | --- |
+| 01-intro | app | harness | narration-and-action-complete | |
+
+| Step id | narrationStart | narrationComplete | actionStart | actionComplete | settleComplete | advanceAllowed |
+| --- | --- | --- | --- | --- | --- | --- |
+| 01-intro | | | | | | |
 
 ## Visible Cursor Actions
 
@@ -111,12 +160,21 @@ Required fields:
 
 - [ ] Hidden owner-demo mode is available behind an owner-only flag.
 - [ ] Normal user behavior is unchanged outside owner-demo mode.
+- [ ] Primary orchestration model is declared before implementation.
+- [ ] Start button semantics are explicit and verified.
+- [ ] One runner owns step progression.
+- [ ] Narration and visible actions do not advance as separate uncoordinated systems.
+- [ ] Next step narration starts only after current narration, action, and settle phases complete.
+- [ ] Manual advance is disabled while narration or action is running.
 - [ ] Stable `data-demo-*` targets exist for every visible action.
 - [ ] App exposes readable `window.__ownerRunDemo` state.
 - [ ] App owns live AI narration and prevents overlapping playback.
+- [ ] Narration completion is awaitable or has a recorded timeout fallback.
+- [ ] Action completion is awaitable or has an observed completion signal.
 - [ ] Harness uses OS-level input for visible cursor movement, clicks, and scrolling.
 - [ ] Harness uses browser automation only for state, route, readiness, and bounds.
 - [ ] Harness re-measures targets before every visible action.
+- [ ] Verification proves visible actions happened and rejects speech-only advancement.
 - [ ] Fake typing, if used, looks browser-real.
 - [ ] Failure states are visible and include the current step.
 - [ ] Owner setup and rerun instructions are documented.
@@ -132,6 +190,10 @@ Harness dry run:
 Visual verification:
 
 Narration verification:
+
+Synchronization verification:
+
+Visible action evidence:
 
 Abort verification:
 

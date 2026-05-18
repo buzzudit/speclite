@@ -24,23 +24,33 @@ Rules:
 - Do not use browser JavaScript clicks for visible actions.
 - Visible cursor movement, clicks, and scrolling must use real OS-level input.
 - Browser automation may be used only to read state, route, readiness, DOM targets, and bounds.
+- Declare one primary orchestrator before implementation: `app-orchestrated`, `harness-orchestrated`, or `hybrid`.
+- Do not let narration and visible actions advance as separate uncoordinated systems.
+- A step is complete only after narration ended, visible action completed, and the UI settled.
+- If the app shows a Start button, define whether it runs the whole demo, arms the harness, or begins a hybrid handoff.
+- Verification must prove visible actions happened, not just narration or state changes.
 
 Implementation steps:
 
 1. Inspect the target app, routes, existing scripts, and local run commands.
 2. Identify the demo workflow, audience, starting state, ending state, and required services.
-3. Add hidden owner-demo mode, usually behind `?workflowDemo=owner-demo`.
-4. Add stable DOM targets using explicit `data-demo-*` attributes.
-5. Add app-side owner demo state on `window.__ownerRunDemo`.
-6. Add app-side narration state and live AI narration playback.
-7. Add app-side fake typing only where it can look browser-real.
-8. Add a local harness under `scripts/demo/`, for example `scripts/demo/run-owner-demo.mjs`.
-9. Use OS-level input for visible mouse movement, clicks, and scrolling.
-10. Use CDP, Playwright, browser APIs, or equivalent only for state and bounds.
-11. Re-measure targets before every visible action.
-12. Add owner permission and setup instructions for the supported platform.
-13. Verify the workflow visually and with the repo's build, lint, typecheck, or static checks.
-14. Document how to rerun it.
+3. Choose and document the primary orchestration model: `app-orchestrated`, `harness-orchestrated`, or `hybrid`.
+4. Define Start button semantics and the single runner that owns step progression.
+5. Define the step synchronization contract before writing code.
+6. Add hidden owner-demo mode, usually behind `?workflowDemo=owner-demo`.
+7. Add stable DOM targets using explicit `data-demo-*` attributes.
+8. Add app-side owner demo state on `window.__ownerRunDemo`.
+9. Add app-side narration state and live AI narration playback.
+10. Make narration awaitable through completion, error, or timeout-backed signals.
+11. Add app-side fake typing only where it can look browser-real and report completion.
+12. Add a local harness under `scripts/demo/`, for example `scripts/demo/run-owner-demo.mjs`, only when the selected model needs harness-owned orchestration or OS input.
+13. Use OS-level input for visible mouse movement, clicks, and scrolling.
+14. Use CDP, Playwright, browser APIs, or equivalent only for state and bounds.
+15. Re-measure targets before every visible action.
+16. Disable manual advance while narration or action is running.
+17. Add owner permission and setup instructions for the supported platform.
+18. Verify the workflow visually and with the repo's build, lint, typecheck, or static checks.
+19. Document how to rerun it.
 
 App state schema:
 
@@ -50,6 +60,7 @@ type OwnerRunDemoPhase =
   | 'loading'
   | 'prepare'
   | 'preAction'
+  | 'acting'
   | 'narrating'
   | 'settle'
   | 'advance'
@@ -59,13 +70,21 @@ type OwnerRunDemoPhase =
 
 interface OwnerRunDemoState {
   ownerDemo: boolean
+  orchestrationModel: 'app-orchestrated' | 'harness-orchestrated' | 'hybrid'
   state: 'idle' | 'running' | 'complete' | 'unsupported' | 'error'
   phase: OwnerRunDemoPhase
   stepId: string | null
+  currentStep: string | null
   runId: number
+  narrationStatus: 'idle' | 'queued' | 'playing' | 'complete' | 'timeout' | 'error'
+  actionStatus: 'idle' | 'queued' | 'running' | 'complete' | 'timeout' | 'error'
+  canAdvance: boolean
+  lastCompletedAction?: string | null
+  lastCompletedStep?: string | null
   route?: string
   activeJob?: unknown
   pendingAction?: string | null
+  timingFallback?: string | null
   error?: string | null
 }
 ```
@@ -77,6 +96,10 @@ interface OwnerRunDemoStep {
   id: string
   label: string
   narration: string
+  narrationOwner: 'app' | 'harness'
+  actionOwner: 'app' | 'harness' | 'none'
+  advanceTrigger: 'narration-and-action-complete' | 'manual-after-complete' | 'custom'
+  completionSignal: string
   route?: string
   primaryTarget: string
   moveTargets: string[]
@@ -96,8 +119,30 @@ interface OwnerRunDemoStep {
   beforeNarrationMs?: number
   minStepMs?: number
   afterActionMs?: number
+  settleMs?: number
 }
 ```
+
+Step synchronization contract:
+
+For every step, define `narrationStart`, `narrationComplete`, `actionStart`, `actionComplete`, `settleComplete`, and `advanceAllowed`.
+
+Required invariant:
+
+```ts
+nextStep.narrationStart >= currentStep.narrationComplete
+nextStep.narrationStart >= currentStep.actionComplete
+nextStep.narrationStart >= currentStep.settleComplete
+```
+
+Synchronization rules:
+
+- Only one narration may be active at a time.
+- Narration must return completion, error, or timeout-backed state.
+- Clicks, drags, typing, drawing, scrolls, and app-side animations must return completion signals.
+- Next, Start, and manual advance controls must be disabled while a step is narrating or acting.
+- If speech synthesis or AI audio never fires `ended`, use a calculated timeout and expose it in `timingFallback`.
+- The next step cannot start narration until the current narration, action, and settle milestones are complete.
 
 Stable target examples:
 
@@ -128,11 +173,17 @@ Owner setup guidance:
 Acceptance criteria:
 
 - The owner-demo mode is hidden and normal user behavior is unchanged.
+- The primary orchestration model is documented and implemented.
+- Start button semantics match the selected orchestration model.
+- One runner owns step progression.
+- Step synchronization proves narration, action, and settle phases finish before the next narration starts.
 - `window.__ownerRunDemo` exposes readable state and visible errors.
 - Stable `data-demo-*` targets exist for every action.
 - Live AI narration is app-owned, synchronized, and does not overlap.
+- Narration and actions expose completion signals or recorded timeout fallbacks.
 - The harness uses OS-level input for visible actions.
 - The harness uses browser automation only for measurement and state.
+- Verification proves visible actions happened and rejects speech-only advancement.
 - Missing targets, unsupported platforms, narration failures, and aborts fail cleanly.
 - Setup and rerun instructions are documented.
 - The repo's relevant validation checks pass, or blocked checks are recorded with fallback verification and residual risk.

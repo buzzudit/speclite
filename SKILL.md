@@ -335,12 +335,17 @@ Preserve the boundary:
 
 Hard rules:
 
+- every owner demo must declare one primary orchestrator before implementation: `app-orchestrated`, `harness-orchestrated`, or `hybrid`
+- do not implement narration and visual actions as separate advancing systems unless the plan defines the handoff contract and completion signals
 - browser automation may read state, route, readiness, and DOM bounds
 - browser automation must not perform visible clicks
 - visible mouse movement, clicks, and scrolling must come from OS-level input
 - text selectors are too brittle; use explicit `data-demo-*` attributes
 - fake typing is acceptable only when it has real focus, visible caret, character-by-character entry, and natural app state updates
 - live narration must not overlap or be cut off
+- a step is not complete when narration text changes; it is complete only after narration ended, the visible action finished, and the UI settled
+- if the app shows a Start button, define whether it runs the whole demo, arms the harness, or begins a hybrid handoff
+- verification must prove visible actions happened, not just narration or state changes
 
 For macOS, the module recommends Node orchestration plus Python `ctypes`/CoreGraphics events such as `CGEventCreateMouseEvent`, `CGEventCreateScrollWheelEvent`, and `CGEventPost`. Avoid compiled native helpers unless already approved because unsigned binaries may be blocked.
 
