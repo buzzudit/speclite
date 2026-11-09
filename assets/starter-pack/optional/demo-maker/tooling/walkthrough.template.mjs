@@ -13,8 +13,8 @@ const PAD = 0.55 // seconds of breathing room after each line
 await generate() // cached by text, voice and settings, so unchanged lines cost nothing
 const clips = Object.fromEntries(beats.map((b) => [b.id, { file: clipPath(b), dur: duration(clipPath(b)) }]))
 
-// storage: start state written to localStorage before the app loads (for example a theme key). scrollSelector: the element that scrolls.
-const t = await start({ name: OUT, storage: {}, scrollSelector: 'main' })
+// baseUrl: where the app is served (check it is the right app). storage: start state written to localStorage before the app loads (for example a theme key). scrollSelector: the element that scrolls.
+const t = await start({ name: OUT, baseUrl: '{{APP_URL}}', storage: {}, scrollSelector: 'main' })
 const { page } = t
 const t0 = Date.now()
 const now = () => (Date.now() - t0) / 1000

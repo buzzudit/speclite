@@ -4,7 +4,8 @@ import { chromium } from 'playwright'
 import fs from 'node:fs'
 import path from 'node:path'
 
-export const BASE = process.env.TOUR_URL ?? 'http://localhost:5190'
+// Where the app is served. Set TOUR_URL or pass baseUrl to start(). The default is Vite's usual port; always check it points at the right app.
+export const BASE = process.env.TOUR_URL ?? 'http://localhost:5173'
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 const overlay = () => {
@@ -44,7 +45,7 @@ const overlay = () => {
   if (document.body) add(); else document.addEventListener('DOMContentLoaded', add)
 }
 
-export async function start({ name, width = 1280, height = 720, storage = {}, scrollSelector = 'main' }) {
+export async function start({ name, width = 1280, height = 720, storage = {}, scrollSelector = 'main', baseUrl = BASE }) {
   const outDir = path.resolve('tour/out')
   fs.mkdirSync(outDir, { recursive: true })
   const tmp = path.join(outDir, `.${name}-raw`)
@@ -55,7 +56,7 @@ export async function start({ name, width = 1280, height = 720, storage = {}, sc
     recordVideo: { dir: tmp, size: { width, height } },
     colorScheme: 'light',
   })
-  await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: BASE })
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: baseUrl })
   await context.addInitScript(overlay)
   // Clean, repeatable start: clear storage once per run, then apply any start state the demo needs (for example a theme key).
   await context.addInitScript((st) => { try { if (!sessionStorage.getItem('tour-init')) { localStorage.clear(); for (const [k, v] of Object.entries(st)) localStorage.setItem(k, v); sessionStorage.setItem('tour-init', '1') } } catch { /* ignore */ } }, storage)
@@ -64,7 +65,7 @@ export async function start({ name, width = 1280, height = 720, storage = {}, sc
 
   const tour = {
     page,
-    async goto(p = '/') { await page.goto(BASE + p); await page.waitForLoadState('networkidle') },
+    async goto(p = '/') { await page.goto(baseUrl + p); await page.waitForLoadState('networkidle') },
     async caption(step, text) {
       await page.evaluate(([s, t]) => {
         const c = document.getElementById('tour-caption'); if (!c) return
