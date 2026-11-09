@@ -1,6 +1,6 @@
 ---
 name: speclite
-description: Scaffold or adapt a lightweight project operating system for a new repo or a mature planning-first workspace. Use when Codex needs to bootstrap a repo, merge into an already-operating workflow, create or adapt planning docs, enforce story-driven execution, add testing and design policy, or tighten an existing operating model without inventing parallel structure.
+description: Scaffold or adapt a lightweight project operating system for a new repo or a mature planning-first workspace. Use when Codex needs to bootstrap a repo, merge into an already-operating workflow, create or adapt planning docs, enforce story-driven execution, add testing and design policy, tighten an existing operating model without inventing parallel structure, or produce a narrated walkthrough video of a product (Demo Maker).
 ---
 
 # Speclite
@@ -99,6 +99,7 @@ Use these module rules:
 - Bootstrap module: add `planning/bootstrap-plan.md` and `steps/step-01.md` when the user wants ordered milestone execution or when the repo already uses numbered step outputs.
 - Compliance module: add `planning/regulations.md` only for trust-heavy or sensitive projects.
 - Design module: add `planning/design-direction.md` and `design/` guidance when the project has a marketing site, product UX, operational surfaces, or meaningful visual/messaging design work.
+- Demo Maker module: add `planning/demo-maker-workflows.md`, `demos/demo-plan.md`, `prompts/implement-demo-maker.md` and the `tour/` tooling when the user wants a narrated walkthrough video of a web app or prototype, with an AI voiceover in sync with scripted on-screen actions.
 - Owner-run demo module: add `planning/owner-run-demo-workflows.md`, `demos/owner-run-demo-plan.md`, and `prompts/implement-owner-run-demo.md` when the user wants an AI-launched owner demo where AI scripts visible mouse movement, keyboard-style input, clicks, waits, triggers, and live AI narration.
 
 If the user asks for a minimal setup, the safe fallback is core only.
@@ -234,6 +235,11 @@ Starter templates live here:
 - `assets/starter-pack/optional/owner-run-demo/demos/owner-run-demo-plan.md`
 - `assets/starter-pack/optional/owner-run-demo/prompts/implement-owner-run-demo.md`
 
+- `assets/starter-pack/optional/demo-maker/planning/demo-maker-workflows.md`
+- `assets/starter-pack/optional/demo-maker/demos/demo-plan.md`
+- `assets/starter-pack/optional/demo-maker/prompts/implement-demo-maker.md`
+- `assets/starter-pack/optional/demo-maker/tooling/` (`lib.mjs`, `voice.mjs`, `mux.mjs`, `script.template.mjs`, `walkthrough.template.mjs`)
+
 Use these as starting points, not immutable output. Replace placeholders such as `{{PROJECT_NAME}}`, `{{PROJECT_TYPE}}`, and `{{PRIMARY_USER}}`.
 
 ## Compliance Heuristics
@@ -348,6 +354,42 @@ Hard rules:
 - verification must prove visible actions happened, not just narration or state changes
 
 For macOS, the module recommends Node orchestration plus Python `ctypes`/CoreGraphics events such as `CGEventCreateMouseEvent`, `CGEventCreateScrollWheelEvent`, and `CGEventPost`. Avoid compiled native helpers unless already approved because unsigned binaries may be blocked.
+
+## Demo Maker Module
+
+Use this optional module to make a narrated walkthrough video (mp4) of a web app or prototype.
+
+Core framing:
+
+> Demo Maker: write the story as beats, generate the voice first, then record the real product at the pace of the voice, and place every line exactly where its action starts.
+
+How it differs from the owner-run demo: Demo Maker produces a finished video from a headless browser with an injected cursor and click ripples, with pre-generated voice clips placed by timing. The owner-run demo is a live run with the real OS cursor and live narration. Do not mix them; pick one per demo.
+
+Add this module when:
+
+- the product runs in a browser and can be reset to a clean, repeatable start state
+- the goal is a shareable or re-recordable walkthrough, concept review or pre-interview asset
+- the owner wants an AI voiceover in sync with the visible workflow
+
+Scaffold from:
+
+- `assets/starter-pack/optional/demo-maker/planning/demo-maker-workflows.md`
+- `assets/starter-pack/optional/demo-maker/demos/demo-plan.md`
+- `assets/starter-pack/optional/demo-maker/prompts/implement-demo-maker.md`
+- `assets/starter-pack/optional/demo-maker/tooling/`
+
+Hard rules:
+
+- the product must carry the journey before recording: a first screen that sets up the person and moment, a guided path with one next action per screen, and the strongest moment built as a screen; fix the product first if it does not
+- write the beats table first and get the owner's approval of the narration before generating any voice, because the text is sent to the voice service
+- the voice key lives in a git-ignored `.env` or the environment; never print it or commit it; if the key lacks a permission, do not work around it and record what could not be verified
+- generate all voice clips first and measure them; pace the recording by the clips, never the reverse
+- always calibrate picture time against the clock using high-contrast anchors (title card, closing card, chapter labels); the offset varies between runs
+- use a full ffmpeg and ffprobe for H.264 and AAC; the bundled Playwright ffmpeg cannot
+- use real clicks through the helper and stable selectors, and start from a clean state
+- verification must prove sync: length, calibration residuals, frames at beat starts, and audio onsets against placed times; record what a person still has to check by ear
+
+Expressive voice: use `eleven_v3` with performance tags such as [calm], [curious], [thoughtful], [whispers], [short pause], and direct with punctuation. v3 has no request stitching.
 
 ## Mature Repo Maintenance
 

@@ -22,6 +22,14 @@ const requiredFiles = [
   'assets/starter-pack/optional/owner-run-demo/planning/owner-run-demo-workflows.md',
   'assets/starter-pack/optional/owner-run-demo/demos/owner-run-demo-plan.md',
   'assets/starter-pack/optional/owner-run-demo/prompts/implement-owner-run-demo.md',
+  'assets/starter-pack/optional/demo-maker/planning/demo-maker-workflows.md',
+  'assets/starter-pack/optional/demo-maker/demos/demo-plan.md',
+  'assets/starter-pack/optional/demo-maker/prompts/implement-demo-maker.md',
+  'assets/starter-pack/optional/demo-maker/tooling/lib.mjs',
+  'assets/starter-pack/optional/demo-maker/tooling/voice.mjs',
+  'assets/starter-pack/optional/demo-maker/tooling/mux.mjs',
+  'assets/starter-pack/optional/demo-maker/tooling/script.template.mjs',
+  'assets/starter-pack/optional/demo-maker/tooling/walkthrough.template.mjs',
 ]
 
 const requiredSkillTerms = [
@@ -36,6 +44,27 @@ const requiredSkillTerms = [
   'assets/starter-pack/optional/owner-run-demo/planning/owner-run-demo-workflows.md',
   'assets/starter-pack/optional/owner-run-demo/demos/owner-run-demo-plan.md',
   'assets/starter-pack/optional/owner-run-demo/prompts/implement-owner-run-demo.md',
+]
+
+const requiredDemoMakerSkillTerms = [
+  'Demo Maker module',
+  'eleven_v3',
+  'calibrate picture time against the clock',
+  'full ffmpeg and ffprobe',
+  'never print it or commit it',
+  'assets/starter-pack/optional/demo-maker/planning/demo-maker-workflows.md',
+  'assets/starter-pack/optional/demo-maker/tooling/',
+]
+
+const requiredDemoMakerGuideTerms = [
+  'Demo Maker versus the owner-run demo',
+  'the product must carry the journey',
+  'Calibrate.',
+  'Playwright',
+  'ELEVENLABS_API_KEY',
+  '[short pause]',
+  'does not support request stitching',
+  'Verification checklist',
 ]
 
 const requiredDemoGuideTerms = [
@@ -124,6 +153,23 @@ for (const term of [
   'Document how to rerun it',
 ]) {
   assert(prompt.includes(term), `Implementation prompt is missing: ${term}`)
+}
+
+for (const term of requiredDemoMakerSkillTerms) {
+  assert(skill.toLowerCase().includes(term.toLowerCase()), `SKILL.md is missing Demo Maker reference: ${term}`)
+}
+assert(readme.includes('Demo Maker'), 'README.md is missing Demo Maker discovery section')
+const makerGuide = read('assets/starter-pack/optional/demo-maker/planning/demo-maker-workflows.md')
+for (const term of requiredDemoMakerGuideTerms) {
+  assert(makerGuide.toLowerCase().includes(term.toLowerCase()), `Demo Maker guide is missing: ${term}`)
+}
+const makerPlan = read('assets/starter-pack/optional/demo-maker/demos/demo-plan.md')
+for (const heading of ['## Demo Summary', '## Journey', '## Voice', '## Beats', '## Start State And Data', '## Sync Plan', '## Acceptance Criteria', '## Test Plan']) {
+  assert(makerPlan.includes(heading), `Demo Maker plan is missing heading: ${heading}`)
+}
+const makerPrompt = read('assets/starter-pack/optional/demo-maker/prompts/implement-demo-maker.md')
+for (const term of ['Never print the key', 'full ffmpeg and ffprobe', 'Get the owner', 'Verify: video length']) {
+  assert(makerPrompt.includes(term), `Demo Maker prompt is missing: ${term}`)
 }
 
 console.log('Speclite validation passed.')

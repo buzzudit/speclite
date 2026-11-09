@@ -50,7 +50,7 @@ stories/
   index.md
 ```
 
-Optional modules include bootstrap steps, compliance constraints, design direction, and owner-run AI demo workflows.
+Optional modules include bootstrap steps, compliance constraints, design direction, owner-run AI demo workflows, and Demo Maker (narrated walkthrough videos).
 
 ---
 
@@ -71,6 +71,26 @@ Starter files live under:
 
 ```
 assets/starter-pack/optional/owner-run-demo/
+```
+
+---
+
+## Demo Maker (narrated walkthrough videos)
+
+Speclite can scaffold a repeatable way to make a narrated walkthrough video of a web app or prototype:
+
+* A scripted browser drives the real UI, with a visible cursor, click ripples, chapter labels and title cards
+* An AI voice (ElevenLabs, expressive `eleven_v3` with performance tags) narrates one line per beat
+* Voice clips are generated first, so the recording is paced by the voice
+* Picture time is calibrated against the clock, then every line is placed at its beat in an mp4
+* Re-recording is one command, and unchanged lines are cached
+
+It makes a finished video. For a live demo with the real OS cursor, use the owner-run demo module instead.
+
+Starter files live under:
+
+```
+assets/starter-pack/optional/demo-maker/
 ```
 
 ---
