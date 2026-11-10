@@ -78,12 +78,31 @@ Suggested npm scripts: `tour:voice` (`node tour/voice.mjs`), `tour:record` (`nod
 
 ## Voice direction (ElevenLabs)
 
+A flat read is a defect, not a neutral default. The narration must have intonation: pace, pitch and feeling that move with the meaning of each line. Write every line as a small performance with an arc, not as text with one tag in front.
+
+**Tools**
 - Use `eleven_v3` for expressive delivery. It follows performance tags in square brackets and the punctuation of the text.
-- Documented tags to prefer: `[calm]`, `[curious]`, `[excited]`, `[thoughtful]`, `[serious]`, `[whispers]`, `[sighs]`, `[short pause]`, `[long pause]`. Other plain-English tags usually work but can be read aloud; check by ear.
-- Direct with punctuation: ellipses and dashes for pauses, a question mark to lift the voice, capitals for stress, short sentences.
-- v3 offers stability presets (0.0 creative, 0.5 natural, 1.0 robust). 0.3 is a good expressive default. v3 does not support request stitching (`previous_text` and `next_text`); older models do.
-- Spell numbers and units as words in the text ("five point four micromolar", "forty-five times").
-- Expressive delivery runs longer than flat delivery because of the pauses. Re-record the picture at the new pace rather than squeezing audio to fit the old timings.
+- Documented tags to prefer: `[calm]`, `[curious]`, `[excited]`, `[thoughtful]`, `[serious]`, `[whispers]`, `[sighs]`, `[short pause]`, `[long pause]`. Other plain-English tags (for example `[warm]`, `[softly]`, `[upbeat]`) usually work but can be read aloud; avoid them unless you can check by ear.
+- v3 offers stability presets (0.0 creative, 0.5 natural, 1.0 robust). Use 0.25 to 0.3 with style 0.4 to 0.5 for narration. If a take sounds flat, lower stability before anything else. v3 does not support request stitching (`previous_text` and `next_text`); older models do.
+
+**Rules for a performance, not a read**
+1. **Give each line an arc.** A line longer than one sentence changes feeling at least once, at the point where its meaning changes: setup, then reveal, then consequence. Put a new tag at that point. Example: `[curious] Two analogues look threefold apart... [short pause] [serious] but the interval says otherwise.`
+2. **Vary the openers.** No single tag opens more than about a third of the beats. Mostly `[calm]` and `[curious]` is a flat video with two flavours.
+3. **Make the "so what" beat the strongest contrast.** Pause before it, drop to `[serious]` or `[thoughtful]`, short sentences, and one stressed word. Let the lines either side be quieter so it stands out.
+4. **Stress with capitals.** One or two words per line in CAPITALS where a person would lean on them ("the interval includes NO difference"). Do not capitalise whole sentences.
+5. **Direct with punctuation.** Ellipses for a trailing thought, a dash for a turn, a short sentence for impact, a question mark to lift the voice, an exclamation mark for a real release ("The flag clears!"). Use pause tags before reveals and after a line that needs to land.
+6. **Match the feeling to the moment.** Curious when posing a question; serious when stating a risk or a limit; excited only for a genuine resolution; calm for orientation; thoughtful for trade-offs. Do not use excitement as a default positive.
+7. **Open and close with intent.** The title line sets the promise; the closing line ends with a quiet, honest tone about what is still unknown.
+
+**Text for the ear**
+- Spell numbers and units as words ("five point four micromolar", "forty-five times", "pIC fifty"). Hyphenate ids so they are read cleanly ("A-seventeen").
+- Short sentences. One idea per beat. Read it aloud before sending it.
+- Expressive delivery runs longer than flat delivery because of the pauses. Re-record the picture at the new pace rather than squeezing audio to fit the old timings. If the actions were timed for older clips, scale their offsets by the ratio of the new clip length to the old one so each action still lands on its words.
+
+**Checks**
+- Before generating, read the script and mark where each line shifts. A line with no shift needs one, or needs to be a single short sentence.
+- After generating, listen for variety: the opening, the reveal and the close should each sound different from a routine beat. Speech-to-text cannot judge this; a person must.
+- Record in the story that tags were not verified as unspoken if the key has no speech-to-text permission.
 
 ## Authoring the actions
 
@@ -104,7 +123,7 @@ Suggested npm scripts: `tour:voice` (`node tour/voice.mjs`), `tour:record` (`nod
 - Sample frames at several beat starts and mid-beat; each shows the screen the line talks about.
 - Measure speech onsets in the final audio (ffmpeg `silencedetect`) and compare with the placed times for several beats.
 - Clip loudness is comparable across beats.
-- A person has listened to it at least once. Record what the tooling could not verify (for example that no direction tag was spoken).
+- A person has listened to it at least once and judged that the delivery has intonation (no flat read, a clear contrast at the "so what" beat). Record what the tooling could not verify (for example that no direction tag was spoken).
 
 ## Privacy and approvals
 

@@ -15,6 +15,7 @@ Rules:
 - Read `planning/demo-maker-workflows.md` first and follow it.
 - Check the product carries the journey before recording (guided path, one next action per screen, no placeholder data, no disclaimer banners unless asked). If it does not, fix the product or stop and say so.
 - Write the demo plan and the beats table first. Get the owner's approval of the narration before generating any voice.
+- Write the narration as a performance, not a flat read: each multi-sentence line shifts feeling where its meaning changes, varied opening tags, capitals on stressed words, a pause before the reveal, the strongest contrast at the "so what" beat (see Voice direction in the workflows doc).
 - The narration text is sent to ElevenLabs. Keep it to fictional or approved content.
 - The API key lives in a git-ignored `.env` or the environment. Add `.env` and `.env.*` to `.gitignore` first. Never print the key, echo it, or put it in a committed file. If the key lacks a permission (a 401), do not work around it; say what could not be verified.
 - Use a full ffmpeg and ffprobe. Do not rely on Playwright's bundled ffmpeg for H.264 or AAC.

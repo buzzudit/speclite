@@ -57,6 +57,7 @@ Numbers and units are written as words. Tags are directions and are not spoken.
 ## Acceptance Criteria
 
 - [ ] Script approved by the owner before voice generation
+- [ ] Script has intonation: every multi-sentence line shifts feeling, openers vary, the "so what" beat has the strongest contrast
 - [ ] Voice clips generated, one per beat, cached
 - [ ] Recorder runs the whole workflow from a clean state in one command
 - [ ] mp4 written with each clip at its beat's calibrated time
