@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Speclite Port Type Registry",
+  "description": "Shared vocabulary of typed ports for skill composition. Skills declare inputs and outputs using these types so the builder can discover compositions.",
+  "types": {
+    "severity-findings": {
+      "description": "Rated findings using the NNG 0-4 severity scale. Each finding has an ID, summary, severity rating, evidence, and recommendation.",
+      "schema": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["id", "summary", "severity"],
+          "properties": {
+            "id": { "type": "string" },
+            "summary": { "type": "string" },
+            "severity": { "type": "integer", "minimum": 0, "maximum": 4 },
+            "evidence": { "type": "string" },
+            "recommendation": { "type": "string" }
+          }
+        }
+      },
+      "widens_to": ["artifact-json"]
+    },
+    "scorecard": {
+      "description": "Numeric scores organized by category. Each entry has a category name, score, maximum possible score, and optional notes.",
+      "schema": {
+        "type": "object",
+        "required": ["categories", "total", "max_total"],
+        "properties": {
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "score", "max_score"],
+              "properties": {
+                "name": { "type": "string" },
+                "score": { "type": "number" },
+                "max_score": { "type": "number" },
+                "notes": { "type": "string" }
+              }
+            }
+          },
+          "total": { "type": "number" },
+          "max_total": { "type": "number" }
+        }
+      },
+      "widens_to": ["artifact-json"]
+    },
+    "theme-codes": {
+      "description": "Qualitative analysis output: thematic codes with definitions, example quotes, and frequency counts.",
+      "schema": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["code", "definition"],
+          "properties": {
+            "code": { "type": "string" },
+            "definition": { "type": "string" },
+            "examples": { "type": "array", "items": { "type": "string" } },
+            "frequency": { "type": "integer" }
+          }
+        }
+      },
+      "widens_to": ["artifact-json"]
+    },
+    "recommendations": {
+      "description": "Prioritized action items. Each has a title, priority, rationale, and effort estimate.",
+      "schema": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["title", "priority"],
+          "properties": {
+            "title": { "type": "string" },
+            "priority": { "enum": ["critical", "high", "medium", "low"] },
+            "rationale": { "type": "string" },
+            "effort": { "enum": ["small", "medium", "large"] }
+          }
+        }
+      },
+      "widens_to": ["artifact-json"]
+    },
+    "checklist": {
+      "description": "Ordered pass/fail/NA criteria list.",
+      "schema": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["item", "status"],
+          "properties": {
+            "item": { "type": "string" },
+            "status": { "enum": ["pass", "fail", "na", "pending"] },
+            "notes": { "type": "string" }
+          }
+        }
+      },
+      "widens_to": ["artifact-json"]
+    },
+    "decision-log": {
+      "description": "Decision records with status, value, evidence, and optional assumptions.",
+      "schema": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["key", "status", "value", "evidence"],
+          "properties": {
+            "key": { "type": "string" },
+            "status": { "enum": ["confirmed", "delegated"] },
+            "value": { "type": "string" },
+            "evidence": { "type": "string" },
+            "assumptions": { "type": "string" }
+          }
+        }
+      },
+      "widens_to": ["artifact-json"]
+    },
+    "lifecycle-gate": {
+      "description": "Stage-gate result: pass, fail, or revisit with evidence.",
+      "schema": {
+        "type": "object",
+        "required": ["gate", "result", "evidence"],
+        "properties": {
+          "gate": { "type": "string" },
+          "result": { "enum": ["pass", "fail", "revisit", "accept-risk"] },
+          "evidence": { "type": "string" },
+          "sign_off": { "type": "string" }
+        }
+      },
+      "widens_to": ["artifact-json"]
+    },
+    "component-ref": {
+      "description": "Reference to a UI component: file path, screenshot, or prose description.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string" },
+          "screenshot": { "type": "string" },
+          "description": { "type": "string" }
+        }
+      },
+      "widens_to": []
+    },
+    "artifact-html": {
+      "description": "A standalone single-file HTML artifact with no external dependencies.",
+      "schema": { "type": "string", "contentMediaType": "text/html" },
+      "widens_to": []
+    },
+    "artifact-markdown": {
+      "description": "A markdown document.",
+      "schema": { "type": "string", "contentMediaType": "text/markdown" },
+      "widens_to": ["text-block"]
+    },
+    "artifact-json": {
+      "description": "Structured JSON data.",
+      "schema": { "type": "object" },
+      "widens_to": ["text-block"]
+    },
+    "artifact-diagram": {
+      "description": "SVG diagram or Mermaid source.",
+      "schema": { "type": "string" },
+      "widens_to": []
+    },
+    "text-block": {
+      "description": "Freeform text. Catch-all for unstructured data.",
+      "schema": { "type": "string" },
+      "widens_to": []
+    }
+  }
+}

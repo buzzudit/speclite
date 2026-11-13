@@ -1,0 +1,65 @@
+---
+name: {{name}}
+user-invocable: {{invocable}}
+description: >
+  {{description}}
+---
+
+# {{title}}
+
+{{purpose_paragraph}}
+
+## Usage
+
+{{#invocable}}
+Start with `/{{name}}` followed by the input.
+
+Example invocations:
+{{#examples}}
+- `/{{name}} {{example}}`
+{{/examples}}
+{{/invocable}}
+
+## Generation contract
+
+**Input:** {{input_description}}
+
+**Output:** {{output_description}}
+
+**Process:**
+
+{{#generation_steps}}
+{{step_number}}. {{step_description}}
+{{/generation_steps}}
+
+## Quality rules
+
+{{#quality_rules}}
+- {{.}}
+{{/quality_rules}}
+
+## Provenance
+
+### Academic
+
+{{#provenance.academic}}
+- **{{claim}}** — {{source}}{{#year}} ({{year}}){{/year}}
+{{/provenance.academic}}
+
+### Industry
+
+{{#provenance.industry}}
+- **{{claim}}** — {{source}} ({{type}})
+{{/provenance.industry}}
+
+## Ports
+
+### Inputs
+{{#ports.inputs}}
+- **{{name}}** (`{{type}}`{{#required}}, required{{/required}}): {{description}}
+{{/ports.inputs}}
+
+### Outputs
+{{#ports.outputs}}
+- **{{name}}** (`{{type}}`): {{description}}
+{{/ports.outputs}}

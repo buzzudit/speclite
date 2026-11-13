@@ -1,6 +1,6 @@
 ---
 name: speclite
-description: Scaffold or adapt a lightweight project operating system for a new repo or a mature planning-first workspace. Use when Codex needs to bootstrap a repo, merge into an already-operating workflow, create or adapt planning docs, enforce story-driven execution, add testing and design policy, tighten an existing operating model without inventing parallel structure, or produce a narrated walkthrough video of a product (Demo Maker).
+description: Scaffold or adapt a lightweight project operating system for a new repo or a mature planning-first workspace. Use when Codex needs to bootstrap a repo, merge into an already-operating workflow, create or adapt planning docs, enforce story-driven execution, add testing and design policy, tighten an existing operating model without inventing parallel structure, produce a narrated walkthrough video of a product (Demo Maker), or build a new Claude Code skill from domain expertise (Skill Builder).
 ---
 
 # Speclite
@@ -103,6 +103,7 @@ Use these module rules:
 - Owner-run demo module: add `planning/owner-run-demo-workflows.md`, `demos/owner-run-demo-plan.md`, and `prompts/implement-owner-run-demo.md` when the user wants an AI-launched owner demo where AI scripts visible mouse movement, keyboard-style input, clicks, waits, triggers, and live AI narration.
 - Scenario Mould module: add `.claude/skills/scenario-mould/` (SKILL.md, references, scripts) when the project has UI components that depend on variable content, server-driven lists, or multiple data states and must survive a range of viewports. The mould generates and stress-tests scenarios across layout, data state, content, interaction, and accessibility dimensions with an offline HTML model and a severity-rated report.
 - Heuristic Evaluation module: add `.claude/skills/heuristic-evaluation/` (SKILL.md) when the project needs structured UX review. A 12-heuristic framework: the NNG 10, a Human-Centered AI heuristic, and a Product-Market Alignment heuristic for startups and early-stage products. Pairs well with the Scenario Mould — both use the same 0–4 severity scale.
+- Skill Builder module: add `.claude/skills/skill-builder/` (SKILL.md, references, scripts, schemas, templates) when the user wants to encode a methodology, playbook, or domain expertise as a reusable Claude Code skill. The builder interviews the author, auto-gathers provenance (academic and industry), generates typed ports for composition, scaffolds verification scripts, and produces a complete skill package. Invoke with `/skill-builder`.
 
 If the user asks for a minimal setup, the safe fallback is core only.
 
@@ -245,6 +246,10 @@ Starter templates live here:
 - `assets/starter-pack/optional/scenario-mould/` (complete Claude Code skill: `SKILL.md`, `references/` with session-guide, mould-contract, enforcement, report-format, designer-testing, mould-reference.html; `scripts/` with verify_session.py, verify_mould.py, verify_browser.cjs, verify_delivery.py)
 
 - `assets/starter-pack/optional/heuristic-evaluation/SKILL.md` (single-file Claude Code skill: 12-heuristic UX evaluation framework)
+
+- `assets/starter-pack/optional/skill-builder/` (complete Claude Code skill: `SKILL.md`, `references/` with interview-guide, generation-contract, provenance-guide, port-catalog; `scripts/` with validate_manifest.py, validate_skill_package.py, discover_compositions.py)
+- `assets/skill-builder/schemas/` (skill-manifest.schema.json, port-types.json, deliverable-types.json)
+- `assets/skill-builder/templates/` (shape templates for session-flow, reference, one-shot, recurring-check; deliverable templates; verification script templates)
 
 Use these as starting points, not immutable output. Replace placeholders such as `{{PROJECT_NAME}}`, `{{PROJECT_TYPE}}`, and `{{PRIMARY_USER}}`.
 
@@ -453,6 +458,78 @@ Severity scale (shared with usability heuristic evaluations and UX-copy audits):
 | 2 | Minor |
 | 3 | Major |
 | 4 | Catastrophe |
+
+## Skill Builder Module
+
+Use this optional module to create new Claude Code skills for any domain through
+guided conversational interview.
+
+Core framing:
+
+> Skill Builder: interview a domain expert, extract their methodology, ground it
+> in academic and industry evidence, and generate a complete Claude Code skill
+> package with schemas, reference docs, and verification scripts.
+
+Add this module when:
+
+- the user wants to encode a methodology, playbook, or domain expertise as a
+  reusable Claude Code skill
+- the user is formalizing an existing process into a repeatable skill
+- the user wants to compose existing skills in new ways
+
+Do not add this module for projects that only consume existing skills without
+creating new ones.
+
+Scaffold from:
+
+- `assets/starter-pack/optional/skill-builder/` — the Claude Code skill
+- `assets/skill-builder/schemas/` — JSON schemas for skill manifests and port types
+- `assets/skill-builder/templates/` — shape, deliverable, and verification templates
+
+The module installs as `.claude/skills/skill-builder/` in the target repo, plus
+the `assets/skill-builder/` framework files at the repo root. It contains:
+
+- `SKILL.md` — skill definition with nine-step interview flow and four shape
+  archetypes (session-flow, reference, one-shot, recurring-check)
+- `references/interview-guide.md` — deep methodology extraction playbook
+- `references/generation-contract.md` — file generation rules and validation
+- `references/provenance-guide.md` — three evidence layers and gathering strategy
+- `references/port-catalog.md` — typed port vocabulary for skill composition
+- `scripts/validate_manifest.py` — validates skill-manifest.json (Python 3 stdlib)
+- `scripts/validate_skill_package.py` — validates a complete skill directory
+- `scripts/discover_compositions.py` — finds composable skill pairs by port type
+
+Hard rules:
+
+- every generated skill must have a valid skill-manifest.json
+- provenance is required: at least one academic and one industry citation per
+  core methodology step; organizational evidence is optional and user-supplied
+- verification scripts are auto-generated from quality criteria collected during
+  the interview; every skill has at least one automated check
+- typed ports are declared for every skill; the builder discovers composition
+  opportunities with installed skills
+- synthetic data only in all examples
+- the builder deeply interviews the author and challenges assumptions; it does
+  not accept methodology claims without probing
+- templates are starting points, not constraints; the agent adapts structure to
+  the domain
+
+Skill shapes:
+
+| Shape | Description | File count |
+|-------|-------------|------------|
+| session-flow | Multi-step guided session with intake, interview, execution, verification | Full (SKILL.md + references + scripts) |
+| reference | Knowledge base the agent consults, not user-invoked | Minimal (SKILL.md + reference entries) |
+| one-shot | Input in, single artifact out | Light (SKILL.md + contract + verify script) |
+| recurring-check | Periodic assessment against criteria | Medium (SKILL.md + criteria + rubric + verify) |
+
+Provenance layers:
+
+| Layer | Required | Gathered by |
+|-------|----------|-------------|
+| Academic | Yes | Agent (auto-research during interview) |
+| Industry | Yes | Agent (auto-research during interview) |
+| Organizational | No | User (prompted during interview) |
 
 ## Mature Repo Maintenance
 

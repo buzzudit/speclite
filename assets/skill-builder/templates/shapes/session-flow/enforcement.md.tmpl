@@ -1,0 +1,88 @@
+# Enforcement
+
+Load this file before interviewing or building. It governs how the agent agrees
+scope with the user, records decisions, validates the build, and gates delivery.
+
+---
+
+## Before building — agree and record
+
+{{pre_build_agreement_text}}
+
+Prefer fewer questions with richer answers over an exhaustive questionnaire.
+Group missing decisions into a concise proposal rather than asking one at a time.
+
+An explicit request to "choose the details" or "you decide" is valid delegation.
+Silence or choosing a subject to evaluate is not delegation. The agent keeps the
+session record; the user never edits JSON or runs commands.
+
+---
+
+## Decision records
+
+Every agreed point is recorded in the session JSON with this shape:
+
+```json
+{
+  "status": "confirmed",
+  "value": "{{example_decision_value}}",
+  "evidence": "User message: '{{example_decision_evidence}}'"
+}
+```
+
+For delegated decisions:
+
+```json
+{
+  "status": "delegated",
+  "value": "{{example_delegated_value}}",
+  "evidence": "User said: 'you pick the details, I trust your judgment'",
+  "assumptions": "{{example_delegated_assumptions}}"
+}
+```
+
+Required decision keys: {{#required_decision_keys}}`{{.}}`{{^last}}, {{/last}}{{/required_decision_keys}}
+
+Valid statuses: `confirmed`, `delegated`. Delegated decisions must include
+nonempty `assumptions`.
+
+---
+
+## Session JSON schema
+
+```json
+{
+  "skill": "{{name}}",
+  "version": "{{version}}",
+  "timestamp": "ISO 8601",
+  "decisions": {
+    {{#required_decision_keys}}
+    "{{.}}": { "status": "...", "value": "...", "evidence": "..." }{{^last}},{{/last}}
+    {{/required_decision_keys}}
+  },
+  {{#has_items}}
+  "items": [ { "id": "...", "title": "..." } ],
+  {{/has_items}}
+  "deliverables": {
+    {{#deliverable_ids}}
+    "{{.}}": "path/to/file"{{^last}},{{/last}}
+    {{/deliverable_ids}}
+  }
+}
+```
+
+---
+
+## Delivery gate
+
+The session is complete when all of the following are true:
+
+{{#delivery_criteria}}
+- {{.}}
+{{/delivery_criteria}}
+
+The delivery gate runs `scripts/verify_delivery.py` which checks:
+1. All verification scripts pass
+2. Session decisions are recorded and valid
+3. All deliverables exist and are non-empty
+4. Provenance citations are present

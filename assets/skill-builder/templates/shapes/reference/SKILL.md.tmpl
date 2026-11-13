@@ -1,0 +1,48 @@
+---
+name: {{name}}
+user-invocable: false
+description: >
+  {{description}}
+---
+
+# {{title}}
+
+{{purpose_paragraph}}
+
+## When to consult
+
+Load this skill when:
+
+{{#trigger_conditions}}
+- {{.}}
+{{/trigger_conditions}}
+
+## Knowledge entries
+
+{{#entries}}
+### {{entry_title}}
+
+{{entry_content}}
+
+{{/entries}}
+
+## Provenance
+
+### Academic
+
+{{#provenance.academic}}
+- **{{claim}}** — {{source}}{{#year}} ({{year}}){{/year}}
+{{/provenance.academic}}
+
+### Industry
+
+{{#provenance.industry}}
+- **{{claim}}** — {{source}} ({{type}})
+{{/provenance.industry}}
+
+## Ports
+
+### Outputs
+{{#ports.outputs}}
+- **{{name}}** (`{{type}}`): {{description}}
+{{/ports.outputs}}

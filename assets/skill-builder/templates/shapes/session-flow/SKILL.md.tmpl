@@ -1,0 +1,96 @@
+---
+name: {{name}}
+user-invocable: {{invocable}}
+description: >
+  {{description}}
+---
+
+# {{title}}
+
+{{purpose_paragraph}}
+
+## Using this skill
+
+Start with `/{{name}}` followed by what you want to evaluate, generate, or analyze.
+
+Example invocations:
+{{#examples}}
+- `/{{name}} {{example}}`
+{{/examples}}
+
+## Context
+
+If called from a larger workflow, inherit the work item and research question.
+Standalone use is supported — agree an output folder with the user.
+
+{{#composable_with}}
+## Composition
+
+{{composition_notes}}
+{{/composable_with}}
+
+## Methodology
+
+{{#methodology_steps}}
+### Step {{step_number}} — {{step_name}}
+
+{{step_description}}
+
+**Input:** {{step_input}}
+**Judgment:** {{step_judgment}}
+**Output:** {{step_output}}
+
+{{/methodology_steps}}
+
+## Provenance
+
+### Academic
+
+{{#provenance.academic}}
+- **{{claim}}** — {{source}}{{#year}} ({{year}}){{/year}}{{#verified}} ✓{{/verified}}{{^verified}} [unverified]{{/verified}}
+{{/provenance.academic}}
+
+### Industry
+
+{{#provenance.industry}}
+- **{{claim}}** — {{source}} ({{type}})
+{{/provenance.industry}}
+
+{{#provenance.organizational}}
+### Organizational
+
+{{#provenance.organizational}}
+- **{{claim}}** — {{source}} (supplied by {{supplied_by}})
+{{/provenance.organizational}}
+{{/provenance.organizational}}
+
+## Non-negotiables
+
+- **Synthetic data only.** Never use real user data, PHI, or PII.
+- **Provenance required.** Every methodology step cites at least one academic and one industry source.
+- **Verification scripts must pass.** The delivery gate requires all automated checks to pass before handoff.
+{{#custom_non_negotiables}}
+- {{.}}
+{{/custom_non_negotiables}}
+
+## Severity scale
+
+{{#severity_scale}}
+| Rating | Label | Description |
+|--------|-------|-------------|
+{{#severity_scale.levels}}
+| {{rating}} | {{label}} | {{description}} |
+{{/severity_scale.levels}}
+{{/severity_scale}}
+
+## Ports
+
+### Inputs
+{{#ports.inputs}}
+- **{{name}}** (`{{type}}`{{#required}}, required{{/required}}): {{description}}
+{{/ports.inputs}}
+
+### Outputs
+{{#ports.outputs}}
+- **{{name}}** (`{{type}}`): {{description}}
+{{/ports.outputs}}

@@ -1,0 +1,71 @@
+# Session Guide
+
+Load this file at the start of every `/{{name}}` session. It covers intake,
+context gathering, and the adaptive interview that produces the work specification.
+
+---
+
+## Step 1 — Orientation
+
+Open with an orientation block (blockquote):
+
+> Welcome. This {{skill_type}} works with {{subject_description}}. No specialized
+> background needed.
+>
+> Steps overview:
+> - Step 1: Orientation (this step)
+> - Step 2: Context — what is being {{verb_past_participle}} and who is the audience
+> - Step 3: Materials — gather the inputs
+> - Step 4: Adaptive interview — agree scope, bounds, and quality criteria
+> - Step 5: Execution — perform the {{skill_type}}
+> - Step 6: Verification — run automated checks
+> - Step 7: Report — generate deliverables
+> - Step 8: Handoff — save, explain findings, suggest next steps
+>
+> Most sessions take {{estimated_duration}}.
+
+Final line: "You can update or correct anything at any time — just tell me.
+Ready? Let's start."
+
+---
+
+## Step 2 — Context (required)
+
+Ask:
+
+{{#context_questions}}
+{{question_number}}. **{{question_label}}** {{question_text}}
+{{/context_questions}}
+
+A short paragraph for each is enough. If the user provided context with the
+slash command (available as $ARGUMENTS), acknowledge it, confirm it, and go to
+Step 3 without re-asking.
+
+---
+
+## Step 3 — Materials
+
+{{materials_guidance}}
+
+---
+
+## Step 4 — Adaptive interview
+
+Agree on all of the following before beginning work:
+
+{{#interview_topics}}
+- **{{topic_name}}**: {{topic_description}}
+{{/interview_topics}}
+
+Prefer fewer questions with richer answers over an exhaustive questionnaire.
+Group missing decisions into a concise proposal rather than asking one at a time.
+
+An explicit request to "choose the details" or "you decide" is valid delegation.
+Silence is not.
+
+---
+
+## After the interview
+
+Record every agreed point in the session JSON (see `enforcement.md`).
+Proceed to execution.

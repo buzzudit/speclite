@@ -30,6 +30,17 @@ const requiredFiles = [
   'assets/starter-pack/optional/demo-maker/tooling/mux.mjs',
   'assets/starter-pack/optional/demo-maker/tooling/script.template.mjs',
   'assets/starter-pack/optional/demo-maker/tooling/walkthrough.template.mjs',
+  'assets/starter-pack/optional/skill-builder/SKILL.md',
+  'assets/starter-pack/optional/skill-builder/references/interview-guide.md',
+  'assets/starter-pack/optional/skill-builder/references/generation-contract.md',
+  'assets/starter-pack/optional/skill-builder/references/provenance-guide.md',
+  'assets/starter-pack/optional/skill-builder/references/port-catalog.md',
+  'assets/starter-pack/optional/skill-builder/scripts/validate_manifest.py',
+  'assets/starter-pack/optional/skill-builder/scripts/validate_skill_package.py',
+  'assets/starter-pack/optional/skill-builder/scripts/discover_compositions.py',
+  'assets/skill-builder/schemas/skill-manifest.schema.json',
+  'assets/skill-builder/schemas/port-types.json',
+  'assets/skill-builder/schemas/deliverable-types.json',
 ]
 
 const requiredSkillTerms = [
@@ -170,6 +181,80 @@ for (const heading of ['## Demo Summary', '## Journey', '## Voice', '## Beats', 
 const makerPrompt = read('assets/starter-pack/optional/demo-maker/prompts/implement-demo-maker.md')
 for (const term of ['Never print the key', 'full ffmpeg and ffprobe', 'Get the owner', 'Verify: video length']) {
   assert(makerPrompt.includes(term), `Demo Maker prompt is missing: ${term}`)
+}
+
+// Skill Builder module validation
+const requiredSkillBuilderSkillTerms = [
+  'Skill Builder module',
+  'skill-manifest.json',
+  'provenance',
+  'academic',
+  'industry',
+  'session-flow',
+  'reference',
+  'one-shot',
+  'recurring-check',
+  'typed ports',
+  'validate_manifest.py',
+  'assets/starter-pack/optional/skill-builder/',
+  'assets/skill-builder/schemas/',
+]
+
+for (const term of requiredSkillBuilderSkillTerms) {
+  assert(skill.includes(term), `SKILL.md is missing Skill Builder reference: ${term}`)
+}
+
+const sbSkill = normalizeStart(read('assets/starter-pack/optional/skill-builder/SKILL.md'))
+assert(/^---\r?\nname: skill-builder/m.test(sbSkill), 'Skill Builder SKILL.md frontmatter is missing or malformed')
+for (const term of [
+  'Deep methodology extraction',
+  'Provenance gathering',
+  'Port definition',
+  'severity-findings',
+  'skill-manifest.json',
+  'verify_delivery.py',
+  'session-flow',
+  'recurring-check',
+]) {
+  assert(sbSkill.includes(term), `Skill Builder SKILL.md is missing: ${term}`)
+}
+
+const sbInterviewGuide = read('assets/starter-pack/optional/skill-builder/references/interview-guide.md')
+for (const term of [
+  'Extract, don\'t prescribe',
+  'Challenge, don\'t accept',
+  'Ground, don\'t assume',
+  'Phase 3: Deep extraction',
+  'Adaptive depth',
+]) {
+  assert(sbInterviewGuide.includes(term), `Skill Builder interview guide is missing: ${term}`)
+}
+
+const sbProvenanceGuide = read('assets/starter-pack/optional/skill-builder/references/provenance-guide.md')
+for (const term of [
+  'Academic (required, agent-gathered)',
+  'Industry (required, agent-gathered)',
+  'Organizational (optional, user-supplied)',
+  'Conflict resolution',
+  'Minimum requirements',
+]) {
+  assert(sbProvenanceGuide.includes(term), `Skill Builder provenance guide is missing: ${term}`)
+}
+
+const sbManifestSchema = read('assets/skill-builder/schemas/skill-manifest.schema.json')
+try {
+  JSON.parse(sbManifestSchema)
+} catch (e) {
+  assert(false, `skill-manifest.schema.json is not valid JSON: ${e.message}`)
+}
+
+const sbPortTypes = read('assets/skill-builder/schemas/port-types.json')
+try {
+  const portData = JSON.parse(sbPortTypes)
+  assert(portData.types && typeof portData.types === 'object', 'port-types.json missing "types" object')
+  assert('severity-findings' in portData.types, 'port-types.json missing severity-findings type')
+} catch (e) {
+  assert(false, `port-types.json validation failed: ${e.message}`)
 }
 
 console.log('Speclite validation passed.')

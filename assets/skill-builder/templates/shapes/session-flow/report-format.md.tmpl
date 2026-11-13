@@ -1,0 +1,41 @@
+# Report Format
+
+Load this file when generating the final report (Step 7). It defines the
+structure of each deliverable.
+
+---
+
+{{#deliverables}}
+## {{label}} (`{{id}}`)
+
+Format: {{format}}
+
+{{#required_sections}}
+### Required sections
+
+{{#required_sections}}
+- **{{.}}**
+{{/required_sections}}
+{{/required_sections}}
+
+{{#optional_sections}}
+### Optional sections
+
+{{#optional_sections}}
+- {{.}}
+{{/optional_sections}}
+{{/optional_sections}}
+
+{{description}}
+
+---
+
+{{/deliverables}}
+
+## Save and handoff
+
+1. Save all deliverables to the agreed output folder.
+2. Present a summary of findings or results.
+3. Explain limitations and what was not covered.
+4. Suggest next steps.
+5. Offer to re-run with different parameters or to iterate on findings.

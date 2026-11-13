@@ -1,0 +1,215 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://speclite.dev/schemas/skill-manifest.schema.json",
+  "title": "Speclite Skill Manifest",
+  "description": "Metadata contract for every speclite-generated Claude Code skill.",
+  "type": "object",
+  "required": ["name", "version", "shape", "description", "invocable", "provenance", "ports", "deliverables", "verification"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
+      "description": "Kebab-case skill identifier."
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semantic version."
+    },
+    "shape": {
+      "enum": ["session-flow", "reference", "one-shot", "recurring-check"],
+      "description": "Skill archetype that determines file structure and session contract."
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "One-paragraph purpose statement."
+    },
+    "invocable": {
+      "type": "boolean",
+      "description": "Whether the skill has a user-facing slash command."
+    },
+    "command": {
+      "type": ["string", "null"],
+      "pattern": "^/[a-z][a-z0-9-]*$",
+      "description": "Slash command name when invocable is true."
+    },
+    "lifecycle": {
+      "type": "object",
+      "properties": {
+        "stage": {
+          "enum": ["discover", "model", "build", "measure", null],
+          "description": "Which product lifecycle stage this skill serves."
+        },
+        "gate_question": {
+          "type": "string",
+          "description": "One-sentence yes/no question this skill helps answer at a stage gate."
+        }
+      },
+      "additionalProperties": false
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["academic", "industry"],
+      "properties": {
+        "academic": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["claim", "source"],
+            "properties": {
+              "claim": { "type": "string" },
+              "source": { "type": "string" },
+              "year": { "type": "integer" },
+              "doi": { "type": ["string", "null"] },
+              "verified": { "type": "boolean", "default": false }
+            },
+            "additionalProperties": false
+          }
+        },
+        "industry": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["claim", "source"],
+            "properties": {
+              "claim": { "type": "string" },
+              "source": { "type": "string" },
+              "type": { "enum": ["standard", "vendor", "regulatory", "practice"] },
+              "url": { "type": ["string", "null"] }
+            },
+            "additionalProperties": false
+          }
+        },
+        "organizational": {
+          "type": ["array", "null"],
+          "items": {
+            "type": "object",
+            "required": ["claim", "source"],
+            "properties": {
+              "claim": { "type": "string" },
+              "source": { "type": "string" },
+              "supplied_by": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "ports": {
+      "type": "object",
+      "required": ["inputs", "outputs"],
+      "properties": {
+        "inputs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "type", "description"],
+            "properties": {
+              "name": { "type": "string" },
+              "type": { "type": "string" },
+              "description": { "type": "string" },
+              "required": { "type": "boolean", "default": true }
+            },
+            "additionalProperties": false
+          }
+        },
+        "outputs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["name", "type", "description"],
+            "properties": {
+              "name": { "type": "string" },
+              "type": { "type": "string" },
+              "description": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "deliverables": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "format", "description"],
+        "properties": {
+          "id": { "type": "string" },
+          "format": { "enum": ["markdown", "html", "json", "diagram", "scorecard", "pdf", "csv"] },
+          "description": { "type": "string" },
+          "template": { "type": ["string", "null"] }
+        },
+        "additionalProperties": false
+      }
+    },
+    "verification": {
+      "type": "object",
+      "required": ["criteria", "scripts"],
+      "properties": {
+        "criteria": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "description", "automated"],
+            "properties": {
+              "id": { "type": "string" },
+              "description": { "type": "string" },
+              "automated": { "type": "boolean" },
+              "gate": { "type": "boolean", "default": false, "description": "Hard gate (blocks delivery) vs soft check (warning)." }
+            },
+            "additionalProperties": false
+          }
+        },
+        "scripts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["path", "checks"],
+            "properties": {
+              "path": { "type": "string" },
+              "checks": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "severity_scale": {
+      "type": "object",
+      "properties": {
+        "levels": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["rating", "label"],
+            "properties": {
+              "rating": { "type": "integer", "minimum": 0 },
+              "label": { "type": "string" },
+              "description": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "composable_with": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Skill names this skill is known to compose well with."
+    }
+  },
+  "additionalProperties": false
+}

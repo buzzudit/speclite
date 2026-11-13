@@ -1,0 +1,83 @@
+---
+name: {{name}}
+user-invocable: {{invocable}}
+description: >
+  {{description}}
+---
+
+# {{title}}
+
+{{purpose_paragraph}}
+
+## Usage
+
+{{#invocable}}
+Start with `/{{name}}` to run a check. Accepts an optional scope argument.
+
+Example invocations:
+{{#examples}}
+- `/{{name}} {{example}}`
+{{/examples}}
+{{/invocable}}
+
+## Check criteria
+
+{{#criteria}}
+### {{criterion_id}}. {{criterion_name}}
+
+{{criterion_description}}
+
+**Scoring:** {{scoring_method}}
+**Threshold:** {{threshold}}
+{{/criteria}}
+
+## Scoring rubric
+
+| Rating | Label | Description |
+|--------|-------|-------------|
+{{#scoring_levels}}
+| {{rating}} | {{label}} | {{description}} |
+{{/scoring_levels}}
+
+## Output format
+
+Each run produces:
+
+{{#deliverables}}
+- **{{label}}** (`{{format}}`): {{description}}
+{{/deliverables}}
+
+{{#supports_trending}}
+## Trend tracking
+
+When previous runs exist, the check compares against the last run and reports:
+- Criteria that improved
+- Criteria that regressed
+- New issues not seen before
+{{/supports_trending}}
+
+## Provenance
+
+### Academic
+
+{{#provenance.academic}}
+- **{{claim}}** — {{source}}{{#year}} ({{year}}){{/year}}
+{{/provenance.academic}}
+
+### Industry
+
+{{#provenance.industry}}
+- **{{claim}}** — {{source}} ({{type}})
+{{/provenance.industry}}
+
+## Ports
+
+### Inputs
+{{#ports.inputs}}
+- **{{name}}** (`{{type}}`{{#required}}, required{{/required}}): {{description}}
+{{/ports.inputs}}
+
+### Outputs
+{{#ports.outputs}}
+- **{{name}}** (`{{type}}`): {{description}}
+{{/ports.outputs}}

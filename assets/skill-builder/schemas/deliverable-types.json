@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Speclite Deliverable Type Catalog",
+  "description": "Supported output formats for skill deliverables. The skill builder presents this catalog during the interview and scaffolds templates accordingly.",
+  "types": {
+    "markdown": {
+      "label": "Markdown report",
+      "extension": ".md",
+      "description": "Structured report with headings, tables, severity ratings, and recommendations. The most common deliverable type.",
+      "template": "deliverables/markdown.template.md",
+      "required_sections": ["summary", "findings_or_results"],
+      "optional_sections": ["methodology", "recommendations", "scorecard", "limitations", "next_steps"]
+    },
+    "html": {
+      "label": "Interactive HTML artifact",
+      "extension": ".html",
+      "description": "Single-file, zero-dependency interactive artifact that works offline. For exploratory tools, moulds, dashboards.",
+      "template": "deliverables/html.template.html",
+      "constraints": ["single_file", "no_cdn", "no_build_step", "works_offline"]
+    },
+    "json": {
+      "label": "Structured JSON data",
+      "extension": ".json",
+      "description": "Machine-readable structured data: session records, findings, scores, decision logs.",
+      "template": null,
+      "constraints": ["valid_json", "schema_provided"]
+    },
+    "diagram": {
+      "label": "SVG or Mermaid diagram",
+      "extension": ".svg",
+      "description": "Architecture, flow, relationship, or lifecycle diagram. SVG for complex visuals, Mermaid for text-based.",
+      "template": null,
+      "constraints": ["accessible_labels", "theme_aware"]
+    },
+    "scorecard": {
+      "label": "Scorecard",
+      "extension": ".md",
+      "description": "Tabular scorecard with per-item ratings, totals, and grade. Used for evaluations and audits.",
+      "template": "deliverables/scorecard.template.md",
+      "required_sections": ["criteria_table", "total", "grade"]
+    },
+    "pdf": {
+      "label": "Printable PDF",
+      "extension": ".pdf",
+      "description": "Print-ready document with CSS color preservation (print-color-adjust: exact). Generated from HTML via browser print.",
+      "template": null,
+      "constraints": ["print_color_adjust", "landscape_or_portrait"]
+    },
+    "csv": {
+      "label": "Tabular data export",
+      "extension": ".csv",
+      "description": "Flat tabular data for spreadsheet import or further analysis.",
+      "template": null,
+      "constraints": ["header_row", "utf8"]
+    }
+  }
+}
