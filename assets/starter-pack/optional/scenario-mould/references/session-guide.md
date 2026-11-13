@@ -355,3 +355,107 @@ assumptions, and proceed. **Silence is not delegation.**
 
 The agent maintains the session record and runs checks; the designer never edits
 JSON or runs commands.
+
+---
+
+## Batch Mode — Steps B1–B3
+
+When the user asks to test an entire experience, use batch mode. The interview
+happens once for the whole product; then each component runs Steps 3–8 from
+single mode without re-interviewing.
+
+### Step B1 — Scan the product
+
+Scan the codebase for all components that qualify for moulding (criteria from
+Step 1). Present a ranked table of candidates:
+
+```
+| # | Component           | File                    | Why it qualifies                                      | Scenarios inherit from |
+|---|---------------------|-------------------------|-------------------------------------------------------|------------------------|
+| 1 | Patient table       | src/app/page.tsx:422    | 8 columns, variable data, truncation, overflow         | All shared dimensions  |
+| 2 | Sidebar navigation  | src/app/page.tsx:50     | Collapsible, variable items, role-gated sections       | Empty, long labels     |
+| 3 | Timeline            | src/app/page.tsx:600    | Variable phases, date formatting, narrow constraints   | Partial, stress        |
+```
+
+Include:
+
+- Every component that meets ≥2 qualification criteria
+- The file and line where it lives
+- Which shared scenario dimensions apply to it
+- A one-line note on what would break
+
+Ask the user to confirm the list. They may add, remove, or reorder components.
+Components are tested in the confirmed order.
+
+### Step B2 — Single interview
+
+Run one interview that covers the entire product, not each component separately.
+Agree on all of the following:
+
+**Shared seed data:**
+- The synthetic data universe — names, identifiers, dates, statuses, categories.
+  These are reused across every mould. Document the full vocabulary.
+- Everyday counts — how many patients, items, entries does a typical user see?
+- Maximum counts — what's the stress case?
+- Label length distribution — shortest, everyday, longest, localization-inflated.
+- Near-duplicate patterns — what real naming collisions exist in this domain?
+
+**Shared dimensions:**
+- Width set (agreed once for all components).
+- Calibration width (the user's everyday viewport).
+- Data states to test: which of empty/loading/error/partial/overflow apply to
+  this product. Not every component handles every state — but the *set* of
+  states is agreed here and each component picks its subset.
+- Severity thresholds — what the user considers must-fix (3), friction (2),
+  cosmetic (1), intended (0). Same scale across all components.
+
+**Per-component questions:**
+After the shared interview, present any remaining per-component questions as a
+single batch: "For the sidebar: does it collapse to icons? For the timeline:
+can phases be reordered?" Group them; don't interview per component.
+
+The calibration case applies to the component the user tests most (usually the
+main screen). For other components, the everyday case uses the same width and
+the data relevant to that component.
+
+### Step B3 — Write shared-data.md
+
+Write `shared-data.md` in the output folder. This is the shared contract:
+
+```markdown
+# Shared Scenario Data — [Product Name]
+
+## Seed Data
+[Full synthetic vocabulary: names, identifiers, payers, dates, etc.]
+
+## Agreed Dimensions
+- Widths: [list]
+- Calibration: [scenario] at [width]px
+- Data states: [which apply to this product]
+- Severity thresholds: [confirmed scale]
+
+## Per-Component Notes
+- [Component]: [any component-specific decisions from the interview]
+```
+
+This file is the source of truth. Each component mould pulls its data from here.
+If the user changes a shared decision mid-batch, update `shared-data.md` and
+note which earlier moulds are affected.
+
+### Steps B4–B5 — Per component and rollup
+
+**B4**: For each component in the confirmed order, run Steps 3–8 from single
+mode:
+
+- Step 3: Read the component's source and describe its layout contract.
+- Step 4: Adapt scenarios from the shared dimensions (no full re-interview).
+  Only ask questions the source can't answer and the shared interview didn't
+  cover.
+- Steps 5–8: Build, verify, report, save — same as single mode.
+
+Give one progress line when starting each component and one when finishing it.
+The user does not need to confirm between components unless a finding changes
+the shared contract.
+
+**B5**: After all components are done, write a rollup report. See
+`references/report-format.md` for the rollup format.

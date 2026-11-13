@@ -223,3 +223,98 @@ For reliable script parsing, these exact headers are required:
 | Findings | `Scenario \| Width \| Code \| Severity \| Message` |
 | Breakpoints | `Scenario \| Metric \| Width` |
 | Scorecard | `Scenario \| Widths tested \| PASS \| WARN \| BREAK \| Highest Severity` |
+
+---
+
+## Rollup Report (Batch Mode)
+
+Written at Step B5 after all component moulds are complete. This is a
+cross-component summary — it does not replace individual component reports.
+
+File: `rollup-report.md` in the output folder.
+
+### Header
+
+```markdown
+# Scenario Mould Rollup — [Product Name]
+
+Tested [N] components across [M] widths, [P] total scenario × width cells.
+```
+
+### Experience Summary
+
+2–4 sentences on the overall experience health. What works across the board,
+and what pattern of issues emerged. Not a list of components — that's the
+scorecard.
+
+### Cross-cutting findings
+
+Issues that affect multiple components or the experience as a whole. Group by
+theme, not by component:
+
+```markdown
+### Responsive layout below 960px
+Affects: Patient table, Filter bar, Timeline
+[Description of the shared pattern and its severity]
+
+### Error state visibility at narrow widths
+Affects: Patient table, Submission tracking
+[Description]
+```
+
+Each cross-cutting finding:
+- Names the affected components
+- States the shared root cause
+- Gives one recommendation that addresses all affected components together
+- Assigns the highest severity from any contributing component
+
+### Component Scorecard
+
+Aggregate table:
+
+```markdown
+| Component | Scenarios | Cells | PASS | WARN | BREAK | Highest Sev | Top Issue |
+|-----------|-----------|-------|------|------|-------|-------------|-----------|
+| Patient table | 16 | 80 | 47 | 6 | 27 | 4 | Error overflow at 320px |
+| Sidebar nav | 12 | 60 | 52 | 5 | 3 | 3 | Long group names truncate |
+| ...
+| **Total** | **N** | **M** | ... | ... | ... | **4** | |
+```
+
+Headers (exact, for parsing):
+`Component | Scenarios | Cells | PASS | WARN | BREAK | Highest Sev | Top Issue`
+
+### Priority matrix
+
+Rank all severity 3+ findings across all components:
+
+```markdown
+| # | Component | Finding | Severity | Scenarios affected |
+|---|-----------|---------|----------|--------------------|
+| 1 | Patient table | Error overflow at 320px | 4 | S4 |
+| 2 | Patient table | Compression below 960px | 3 | S1,S6–S16 |
+| 3 | Sidebar nav | Group names truncate at 720px | 3 | S5,S7 |
+```
+
+### Links to component reports
+
+```markdown
+## Component Reports
+- [Patient table](dashboard-patient-table-report.md) — 47 PASS, 6 WARN, 27 BREAK
+- [Sidebar navigation](sidebar-nav-report.md) — 52 PASS, 5 WARN, 3 BREAK
+```
+
+### Shared data reference
+
+Link to `shared-data.md` and note any changes made during the batch.
+
+### Calibration summary
+
+One line per component:
+
+```markdown
+| Component | Calibration |
+|-----------|-------------|
+| Patient table | not checked |
+| Sidebar nav | matched |
+```

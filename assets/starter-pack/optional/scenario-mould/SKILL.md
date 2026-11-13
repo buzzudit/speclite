@@ -27,6 +27,7 @@ Example invocations:
 - `/scenario-mould Check whether this navigation works with long German labels and 7+ items`
 - `/scenario-mould Does this patient status bar degrade gracefully when half the fields are empty?`
 - `/scenario-mould Test the filter chip row — I think it breaks on mobile with 10+ filters`
+- `/scenario-mould Test the entire experience — all major components and nav`
 
 The agent agrees the scope, generates scenarios and variations, builds and
 verifies the mould, and explains which cases need attention. Findings give
@@ -158,6 +159,71 @@ Roll up the highest rating in a cell: a 3 anywhere means the row is at least 3.
 Escalate a hidden or truncated safety-critical item (e.g., allergy alert,
 critical medication, financial warning) to the relevant safety or compliance
 review — flag it; a layout fix alone does not resolve it.
+
+## Batch mode — full experience
+
+When the user wants to test an entire experience (all major components and
+navigation), use batch mode instead of running separate single-component
+sessions. Batch mode runs one interview for the whole product, then iterates
+per component with shared context.
+
+### What batch mode shares across components
+
+- **Seed data vocabulary** — patient names, payer names, auth numbers, etc. are
+  invented once and reused. Every component sees the same synthetic universe.
+- **Width set** — agreed once for the product, not per component.
+- **Calibration width** — the user's everyday viewport applies to all components.
+- **Scenario dimensions** — empty, loading, error, partial, stress bounds are
+  agreed at the product level and inherited per component (each component picks
+  the subset that applies).
+- **Severity thresholds** — what counts as broken is agreed once.
+
+### What stays per component
+
+- **Layout engine** — each component's measurement model, column definitions,
+  compression logic, and flags are specific to its contract.
+- **Scenarios** — generated from the shared dimensions but adapted to what each
+  component renders (a table has different scenarios than a timeline).
+- **Flags** — each component defines its own flag set based on its degradation
+  mechanisms.
+- **Mould HTML** — one file per component, each self-contained and offline.
+- **Component report** — one report per component with findings and scorecard.
+
+### Batch output
+
+| File | Purpose |
+|------|---------|
+| `[component].html` | Per-component mould (same as single mode) |
+| `[component]-report.md` | Per-component report (same as single mode) |
+| `rollup-report.md` | Cross-component summary with aggregated scorecard |
+| `shared-data.md` | Documents the shared seed data and agreed dimensions |
+
+### Batch session flow
+
+| Step | Action |
+|------|--------|
+| B1 | Scan the product — identify all major components that qualify for moulding |
+| B2 | Single interview — agree shared dimensions, seed data, widths, calibration, severity thresholds |
+| B3 | Write `shared-data.md` — the shared contract that all component moulds inherit |
+| B4 | Per component: read source → adapt scenarios → build mould → verify → write report (Steps 3–8 from single mode, no re-interview) |
+| B5 | Write rollup report — aggregate findings across all components |
+
+Load `references/session-guide.md` at B1 (batch section),
+`references/mould-contract.md` at B4 per component, and
+`references/report-format.md` at B4 (component) and B5 (rollup).
+
+### Efficiency rules
+
+- **No re-interview.** The shared dimensions from B2 carry forward. Per-component
+  questions are limited to layout-specific details the source doesn't answer
+  (e.g., "does this sidebar collapse to icons?").
+- **Reuse seed data.** The `shared-data.md` contract provides the synthetic
+  vocabulary. Each mould imports names, payers, counts from it — don't reinvent
+  per component.
+- **Brief progress.** One line per component milestone, not a full orientation
+  each time.
+- **Fail fast.** If a component doesn't qualify for moulding (no variable content,
+  no finite space, no degradation mechanism), skip it and note why in the rollup.
 
 ## Working notes
 

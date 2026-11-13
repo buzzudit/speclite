@@ -315,3 +315,55 @@ consistent.
 - Present separate outcomes for: contract checks, browser checks, and
   calibration — a single green "contract passed" is not acceptable
 - The session record is hashed: finalize reviews and rerun browser checks first
+
+---
+
+## Batch mode enforcement
+
+### Shared data contract
+
+- `shared-data.md` must exist in the output folder before any component mould is
+  built.
+- Every component mould must use seed data from `shared-data.md` — no component
+  invents its own names, identifiers, or counts outside the shared vocabulary.
+- The width set in `shared-data.md` is the width set for every component mould.
+  A component may add a width if its layout demands it (e.g., a sidebar that
+  changes at 768px), but must not remove shared widths.
+- If the shared data contract changes mid-batch (user corrects a name, adds a
+  width), update `shared-data.md` and note which earlier moulds are affected in
+  the rollup report.
+
+### Per-component gates in batch mode
+
+Each component mould must pass the same verification as single mode:
+
+1. Syntax check (node --check)
+2. Load check (headless Chrome DOM dump)
+3. Contract check (verify_mould.py)
+4. Report check (verify_mould.py --report)
+
+A failed check on one component does not block other components. Fix failures
+before writing the rollup, or note them as provisional in the rollup.
+
+### Rollup validation
+
+The rollup report must:
+
+- List every component that was tested (no silent omissions).
+- List every component that was scanned but skipped, with a reason.
+- Have a Component Scorecard whose totals match the sum of individual reports.
+- Have a Priority matrix that includes every severity 3+ finding from all
+  component reports, ranked by severity then affected-cell count.
+- Link to every component report and the shared data file.
+- Include a calibration summary for every tested component.
+
+### Efficiency enforcement
+
+- The interview (Step B2) happens once. Per-component questions (Step B4) are
+  limited to what the source doesn't answer and the shared interview didn't
+  cover. If a "per-component question" could have been asked in B2, it should
+  have been.
+- No orientation or method-selection prompts between components.
+- Progress lines only: one when starting a component, one when finishing it.
+  No stopping for confirmation between components unless a finding changes the
+  shared contract or the user intervenes.
