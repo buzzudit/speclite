@@ -102,6 +102,7 @@ Use these module rules:
 - Demo Maker module: add `planning/demo-maker-workflows.md`, `demos/demo-plan.md`, `prompts/implement-demo-maker.md` and the `tour/` tooling when the user wants a narrated walkthrough video of a web app or prototype, with an AI voiceover in sync with scripted on-screen actions.
 - Owner-run demo module: add `planning/owner-run-demo-workflows.md`, `demos/owner-run-demo-plan.md`, and `prompts/implement-owner-run-demo.md` when the user wants an AI-launched owner demo where AI scripts visible mouse movement, keyboard-style input, clicks, waits, triggers, and live AI narration.
 - Scenario Mould module: add `.claude/skills/scenario-mould/` (SKILL.md, references, scripts) when the project has UI components that depend on variable content, server-driven lists, or multiple data states and must survive a range of viewports. The mould generates and stress-tests scenarios across layout, data state, content, interaction, and accessibility dimensions with an offline HTML model and a severity-rated report.
+- Heuristic Evaluation module: add `.claude/skills/heuristic-evaluation/` (SKILL.md) when the project needs structured UX review. A 12-heuristic framework: the NNG 10, a Human-Centered AI heuristic, and a Product-Market Alignment heuristic for startups and early-stage products. Pairs well with the Scenario Mould — both use the same 0–4 severity scale.
 
 If the user asks for a minimal setup, the safe fallback is core only.
 
@@ -242,6 +243,8 @@ Starter templates live here:
 - `assets/starter-pack/optional/demo-maker/tooling/` (`lib.mjs`, `voice.mjs`, `mux.mjs`, `script.template.mjs`, `walkthrough.template.mjs`)
 
 - `assets/starter-pack/optional/scenario-mould/` (complete Claude Code skill: `SKILL.md`, `references/` with session-guide, mould-contract, enforcement, report-format, designer-testing, mould-reference.html; `scripts/` with verify_session.py, verify_mould.py, verify_browser.cjs, verify_delivery.py)
+
+- `assets/starter-pack/optional/heuristic-evaluation/SKILL.md` (single-file Claude Code skill: 12-heuristic UX evaluation framework)
 
 Use these as starting points, not immutable output. Replace placeholders such as `{{PROJECT_NAME}}`, `{{PROJECT_TYPE}}`, and `{{PRIMARY_USER}}`.
 

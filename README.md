@@ -50,7 +50,7 @@ stories/
   index.md
 ```
 
-Optional modules include bootstrap steps, compliance constraints, design direction, owner-run AI demo workflows, Demo Maker (narrated walkthrough videos), and Scenario Mould (UI component scenario generation and stress testing).
+Optional modules include bootstrap steps, compliance constraints, design direction, owner-run AI demo workflows, Demo Maker (narrated walkthrough videos), Scenario Mould (UI component scenario generation and stress testing), and Heuristic Evaluation (12-heuristic UX review with a startup/product lens).
 
 ---
 
@@ -113,6 +113,24 @@ Starter files live under:
 
 ```
 assets/starter-pack/optional/scenario-mould/
+```
+
+---
+
+## Heuristic Evaluation (12-heuristic UX review)
+
+Speclite can scaffold a structured UX evaluation skill with 12 heuristics:
+
+* The Nielsen Norman Group 10 usability heuristics (complete, with full checklist items)
+* Heuristic 11: Human-Centered AI and Automation — grounded in Billings (1991) and Amershi et al. (2019)
+* Heuristic 12: Product-Market Alignment and Value Clarity — for startups and early-stage products: does the product communicate its value, earn trust from a cold start, and fit into real workflows?
+
+Uses the same 0–4 severity scale as the Scenario Mould. Pairs well with it for combined design reviews.
+
+Starter files live under:
+
+```
+assets/starter-pack/optional/heuristic-evaluation/
 ```
 
 ---
