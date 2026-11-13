@@ -101,6 +101,7 @@ Use these module rules:
 - Design module: add `planning/design-direction.md` and `design/` guidance when the project has a marketing site, product UX, operational surfaces, or meaningful visual/messaging design work.
 - Demo Maker module: add `planning/demo-maker-workflows.md`, `demos/demo-plan.md`, `prompts/implement-demo-maker.md` and the `tour/` tooling when the user wants a narrated walkthrough video of a web app or prototype, with an AI voiceover in sync with scripted on-screen actions.
 - Owner-run demo module: add `planning/owner-run-demo-workflows.md`, `demos/owner-run-demo-plan.md`, and `prompts/implement-owner-run-demo.md` when the user wants an AI-launched owner demo where AI scripts visible mouse movement, keyboard-style input, clicks, waits, triggers, and live AI narration.
+- Scenario Mould module: add `.claude/skills/scenario-mould/` (SKILL.md, references, scripts) when the project has UI components that depend on variable content, server-driven lists, or multiple data states and must survive a range of viewports. The mould generates and stress-tests scenarios across layout, data state, content, interaction, and accessibility dimensions with an offline HTML model and a severity-rated report.
 
 If the user asks for a minimal setup, the safe fallback is core only.
 
@@ -239,6 +240,8 @@ Starter templates live here:
 - `assets/starter-pack/optional/demo-maker/demos/demo-plan.md`
 - `assets/starter-pack/optional/demo-maker/prompts/implement-demo-maker.md`
 - `assets/starter-pack/optional/demo-maker/tooling/` (`lib.mjs`, `voice.mjs`, `mux.mjs`, `script.template.mjs`, `walkthrough.template.mjs`)
+
+- `assets/starter-pack/optional/scenario-mould/` (complete Claude Code skill: `SKILL.md`, `references/` with session-guide, mould-contract, enforcement, report-format, designer-testing, mould-reference.html; `scripts/` with verify_session.py, verify_mould.py, verify_browser.cjs, verify_delivery.py)
 
 Use these as starting points, not immutable output. Replace placeholders such as `{{PROJECT_NAME}}`, `{{PROJECT_TYPE}}`, and `{{PRIMARY_USER}}`.
 
@@ -390,6 +393,63 @@ Hard rules:
 - verification must prove sync: length, calibration residuals, frames at beat starts, and audio onsets against placed times; record what a person still has to check by ear
 
 Expressive voice: use `eleven_v3` with performance tags such as [calm], [curious], [thoughtful], [whispers], [short pause], and direct with punctuation. v3 has no request stitching.
+
+## Scenario Mould Module
+
+Use this optional module to generate and stress-test UI component scenarios across viewports, data states, content edge cases, and interaction patterns.
+
+Core framing:
+
+> Scenario Mould: model one component exactly, generate scenarios from its contract, test every scenario × width cell, and rate findings on a shared severity scale.
+
+How it differs from the demo modules: Scenario Mould produces a diagnostic artifact (an offline interactive HTML model and a severity-rated report) for design review and engineering handoff. The demo modules produce presentation artifacts (a live demo or a video). They complement each other — a mould can validate the component before a demo is built.
+
+Add this module when:
+
+- the project has UI components that depend on variable content (server-driven lists, variable label lengths, dynamic counts)
+- components must survive a range of viewports, data states (empty, loading, error, partial), or accessibility conditions (200% zoom, forced colors)
+- layout or state-handling concerns arise during design review or prototyping
+- the team wants engineering-actionable findings with severity ratings and scenario IDs
+
+Do not add this module for projects without meaningful UI components, or for purely backend or CLI work.
+
+Scaffold from:
+
+- `assets/starter-pack/optional/scenario-mould/` — a complete Claude Code skill directory
+
+The module installs as `.claude/skills/scenario-mould/` in the target repo. It contains:
+
+- `SKILL.md` — skill definition with session flow, severity scale, and non-negotiables
+- `references/session-guide.md` — Steps 1–4: component selection, output resolution, contract reading, adaptive interview
+- `references/mould-contract.md` — Steps 5–6: build contract, invariants, state scenario modelling, verification
+- `references/enforcement.md` — decision recording, session JSON schema, browser contract, delivery gate
+- `references/report-format.md` — Steps 7–8: report structure, table headers, calibration, handoff
+- `references/designer-testing.md` — optional guided testing for designers
+- `references/mould-reference.html` — neutral starter (three-tier bar with 16 scenarios and 12 flags including state-aware flags)
+- `scripts/verify_session.py` — validates session JSON (Python 3 stdlib only)
+- `scripts/verify_mould.py` — validates results-json and report (Python 3 stdlib only)
+- `scripts/verify_browser.cjs` — browser interaction checks (Node + Playwright)
+- `scripts/verify_delivery.py` — delivery gate with three separate verdicts (Python 3 stdlib only)
+
+Hard rules:
+
+- synthetic data only — never use real user data, PHI, or PII
+- one file, zero dependencies — the mould works offline with no CDN or build step
+- real measurement with `canvas.measureText`, never character-count estimates
+- the mould is a model, not the product — calibration establishes fidelity; severity 3–4 findings must be confirmed in the real build
+- scenarios are generated from the component's contract, not random fuzzing — every scenario has an ID, a rationale, and a severity threshold
+- state scenarios (empty, loading, error, partial) are first-class — not an afterthought to layout testing
+- the delivery gate requires three separate verdicts (contract, browser, calibration) — a single green "passed" is not acceptable
+
+Severity scale (shared with usability heuristic evaluations and UX-copy audits):
+
+| Rating | Label |
+|--------|-------|
+| 0 | Not a problem |
+| 1 | Cosmetic |
+| 2 | Minor |
+| 3 | Major |
+| 4 | Catastrophe |
 
 ## Mature Repo Maintenance
 

@@ -50,7 +50,7 @@ stories/
   index.md
 ```
 
-Optional modules include bootstrap steps, compliance constraints, design direction, owner-run AI demo workflows, and Demo Maker (narrated walkthrough videos).
+Optional modules include bootstrap steps, compliance constraints, design direction, owner-run AI demo workflows, Demo Maker (narrated walkthrough videos), and Scenario Mould (UI component scenario generation and stress testing).
 
 ---
 
@@ -91,6 +91,28 @@ Starter files live under:
 
 ```
 assets/starter-pack/optional/demo-maker/
+```
+
+---
+
+## Scenario Mould (UI scenario stress testing)
+
+Speclite can scaffold a Claude Code skill that generates and stress-tests UI component scenarios:
+
+* One component modelled exactly in an offline, zero-dependency HTML file
+* Scenarios generated across layout, data state, content, interaction, and accessibility dimensions
+* Every scenario × width cell evaluated and rated on a 0–4 severity scale
+* Findings give engineering-actionable references like "S7 at 720px — overflow menu hides the active tab"
+* State scenarios (empty, loading, error, partial) are first-class, not an afterthought
+* A written Markdown report with matrix, recommendations, scorecard, and calibration status
+* Four verification scripts ensure the mould's contract, browser behavior, and delivery gate
+
+It's a diagnostic tool for design review. For presentation artifacts, use the demo modules instead.
+
+Starter files live under:
+
+```
+assets/starter-pack/optional/scenario-mould/
 ```
 
 ---

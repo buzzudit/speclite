@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scenario Mould — Three-tier Navigation Bar</title>
+<style>
+/* ===== PAGE RESET & VARIABLES ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --ff-chrome: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --ff-component: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --fs-component: 14px;
+  --fw-component: 400;
+  --panel-bg: #f4f5f6;
+  --panel-border: #d0d3d8;
+  --preview-bg: #ffffff;
+  --pass-bg: #d4edda;
+  --pass-fg: #155724;
+  --warn-bg: #fff3cd;
+  --warn-fg: #856404;
+  --break-bg: #f8d7da;
+  --break-fg: #721c24;
+  --handle-idle: transparent;
+  --handle-hover: #90949c;
+  --handle-drag: #5a6270;
+  --gap: 6px;
+  --panel-gap: 4px;
+}
+html, body { height: 100%; overflow: hidden; font-family: var(--ff-chrome); font-size: 13px; color: #1a1a1a; background: #e9eaec; }
+
+/* ===== HIDDEN HEADER (provenance retained in file) ===== */
+.page-header { display: none; }
+
+/* ===== WORKSPACE LAYOUT ===== */
+.workspace { display: flex; height: 100vh; width: 100vw; }
+.playground-wrapper { display: flex; flex-direction: row; width: 280px; min-width: 120px; max-width: 65vw; flex-shrink: 0; }
+.playground { background: var(--panel-bg); border-right: 1px solid var(--panel-border); padding: 12px; overflow-y: auto; flex: 1; }
+.playground.collapsed { display: none; }
+.playground-wrapper.collapsed { width: auto !important; min-width: auto; }
+.pg-resize-handle { width: 5px; cursor: col-resize; background: var(--handle-idle); flex-shrink: 0; transition: background 0.15s; position: relative; }
+.pg-resize-handle:hover, .pg-resize-handle.dragging { background: var(--handle-hover); }
+.pg-resize-handle:focus-visible { outline: 2px solid #4a90d9; outline-offset: -2px; background: var(--handle-hover); }
+.main-area { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.preview-area { flex: 1; min-height: 20px; background: var(--preview-bg); overflow: auto; display: flex; align-items: flex-start; justify-content: center; padding: 24px 16px; position: relative; }
+.result-resize-handle { height: 5px; cursor: row-resize; background: var(--handle-idle); flex-shrink: 0; transition: background 0.15s; }
+.result-resize-handle:hover, .result-resize-handle.dragging { background: var(--handle-hover); }
+.result-resize-handle:focus-visible { outline: 2px solid #4a90d9; outline-offset: -2px; background: var(--handle-hover); }
+.result-wrapper { display: flex; flex-direction: column; height: 260px; min-height: 100px; flex-shrink: 0; }
+.result-wrapper.collapsed .result { display: none; }
+.result-wrapper.collapsed .result-resize-handle { display: none; }
+.result { background: var(--panel-bg); border-top: 1px solid var(--panel-border); padding: 12px; overflow: auto; flex: 1; }
+
+/* ===== PANEL TOGGLES ===== */
+.panel-toggles { position: fixed; top: 8px; right: 8px; display: flex; gap: 4px; z-index: 100; }
+.panel-toggle { width: 28px; height: 28px; border: 1px solid var(--panel-border); border-radius: 4px; background: var(--panel-bg); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
+.panel-toggle:hover { background: #dcdee2; }
+.panel-toggle:focus-visible { outline: 2px solid #4a90d9; outline-offset: 1px; }
+.panel-toggle svg { width: 16px; height: 16px; stroke: #555; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.panel-toggle[aria-expanded="false"] { opacity: 0.6; }
+
+/* ===== PLAYGROUND CONTROLS ===== */
+.pg-section { margin-bottom: 14px; }
+.pg-section label { display: block; font-weight: 600; margin-bottom: 4px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #555; }
+.pg-section select, .pg-section input[type="range"] { width: 100%; }
+.pg-section select { padding: 4px 6px; border: 1px solid var(--panel-border); border-radius: 3px; font-size: 12px; background: #fff; }
+.pg-section .range-row { display: flex; align-items: center; gap: 8px; }
+.pg-section .range-row input { flex: 1; }
+.pg-section .range-val { font-size: 12px; min-width: 40px; text-align: right; font-variant-numeric: tabular-nums; }
+.pg-section .override-row { display: flex; align-items: center; gap: 6px; margin-top: 4px; font-size: 12px; }
+.pg-section .override-row input[type="checkbox"] { margin: 0; }
+.pg-desc { font-size: 11px; color: #666; margin-top: 4px; line-height: 1.4; }
+
+/* ===== COMPONENT (NAVIGATION BAR) ===== */
+.nav-bar-container { width: 100%; max-width: 100%; }
+.sim-width-label { font-size: 11px; color: #888; margin-bottom: 6px; text-align: center; }
+.nav-bar { display: flex; align-items: center; gap: var(--gap); background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; padding: 4px 8px; height: 40px; overflow: hidden; white-space: nowrap; font-family: var(--ff-component); font-size: var(--fs-component); position: relative; }
+.nav-item { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 4px; cursor: pointer; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; flex-shrink: 0; height: 30px; line-height: 22px; position: relative; }
+.nav-item[title] { cursor: default; }
+.nav-item.tier-pinned { font-weight: 600; background: #e9ecef; }
+.nav-item.tier-free { background: transparent; }
+.nav-item.tier-free:hover { background: #e9ecef; }
+.nav-item.tier-action { border: 1px solid #adb5bd; border-radius: 4px; background: transparent; }
+.nav-item.state-active { background: #d0d7de; font-weight: 600; }
+.nav-item.state-disabled { opacity: 0.45; pointer-events: none; }
+.nav-item.state-skeleton { background: #dee2e6; color: transparent; border-radius: 4px; min-width: 60px; animation: pulse 1.5s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
+.nav-item.state-partial { font-style: italic; color: #888; }
+.nav-item.state-error { background: #f8d7da; color: #721c24; font-weight: 600; }
+.nav-spacer { flex: 1; min-width: 0; }
+.nav-more-btn { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 4px; background: #e9ecef; cursor: pointer; flex-shrink: 0; font-size: 12px; font-weight: 500; height: 30px; position: relative; user-select: none; }
+.nav-more-btn:hover { background: #d0d3d8; }
+.nav-empty-msg { font-style: italic; color: #888; padding: 4px 10px; }
+.overflow-menu { position: absolute; top: 100%; right: 0; background: #fff; border: 1px solid var(--panel-border); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.12); padding: 4px 0; z-index: 50; min-width: 180px; max-height: 300px; overflow-y: auto; display: none; }
+.overflow-menu.open { display: block; }
+.overflow-menu-item { padding: 6px 14px; cursor: pointer; white-space: nowrap; font-size: 13px; }
+.overflow-menu-item:hover { background: #f0f1f3; }
+.overflow-menu-item.state-active { font-weight: 600; background: #e8eaed; }
+.overflow-menu-item.state-disabled { opacity: 0.45; pointer-events: none; }
+
+/* ===== RESULT PANEL ===== */
+.res-summary { margin-bottom: 10px; }
+.res-verdict { display: inline-block; padding: 3px 10px; border-radius: 4px; font-weight: 700; font-size: 13px; text-transform: uppercase; }
+.res-verdict.pass { background: var(--pass-bg); color: var(--pass-fg); }
+.res-verdict.warn { background: var(--warn-bg); color: var(--warn-fg); }
+.res-verdict.break { background: var(--break-bg); color: var(--break-fg); }
+.res-info { font-size: 12px; color: #555; margin-top: 4px; }
+.pg-flags { margin: 8px 0; }
+.pg-flags .flag { font-size: 12px; padding: 2px 0; display: flex; gap: 6px; align-items: baseline; }
+.flag-sev { font-weight: 700; min-width: 14px; text-align: center; border-radius: 3px; padding: 0 4px; font-size: 11px; }
+.flag-sev.s0 { color: #555; } .flag-sev.s1 { color: #0c5460; background: #d1ecf1; }
+.flag-sev.s2 { color: var(--warn-fg); background: var(--warn-bg); }
+.flag-sev.s3 { color: var(--break-fg); background: var(--break-bg); }
+.flag-sev.s4 { color: #fff; background: #721c24; }
+.res-section-title { font-weight: 600; font-size: 12px; margin: 12px 0 4px; text-transform: uppercase; letter-spacing: 0.4px; color: #444; }
+.res-widths, .res-thresh, .res-metrics { font-size: 12px; color: #555; margin-bottom: 4px; }
+
+/* ===== MATRIX ===== */
+.res-matrix { border-collapse: collapse; font-size: 11px; margin-top: 6px; width: auto; }
+.res-matrix th { padding: 4px 8px; border: 1px solid var(--panel-border); background: #e8e9ec; font-weight: 600; text-align: center; white-space: nowrap; position: sticky; top: 0; z-index: 2; }
+.res-matrix td.cell { padding: 4px 8px; border: 1px solid var(--panel-border); text-align: center; cursor: pointer; font-weight: 600; font-size: 10px; white-space: nowrap; }
+.res-matrix td.cell.pass { background: var(--pass-bg); color: var(--pass-fg); }
+.res-matrix td.cell.warn { background: var(--warn-bg); color: var(--warn-fg); }
+.res-matrix td.cell.break { background: var(--break-bg); color: var(--break-fg); }
+.res-matrix td.cell:hover { outline: 2px solid #4a90d9; outline-offset: -2px; }
+.res-matrix td.sc-label { padding: 4px 8px; border: 1px solid var(--panel-border); font-size: 11px; white-space: nowrap; max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
+.res-legend { font-size: 11px; color: #666; margin-top: 6px; }
+.res-legend span { margin-right: 12px; }
+</style>
+</head>
+<body>
+
+<!-- Hidden header: provenance retained in file -->
+<div class="page-header">
+  <h1>Scenario Mould — Three-tier Navigation Bar (Reference)</h1>
+  <p>Model note: Zero-dependency offline reference starter. Synthetic data only.</p>
+  <p id="calibration-note">Calibration: not checked — pending real-product comparison.</p>
+</div>
+
+<div class="workspace">
+  <!-- Playground (left panel) -->
+  <div class="playground-wrapper" id="pg-wrapper">
+    <div class="playground" id="playground">
+      <div class="pg-section">
+        <label for="ctl-scenario">Scenario</label>
+        <select id="ctl-scenario"></select>
+        <div class="pg-desc" id="ctl-scenario-desc"></div>
+      </div>
+      <div class="pg-section">
+        <label for="ctl-width">Simulated Width</label>
+        <select id="ctl-width"></select>
+      </div>
+      <div class="pg-section">
+        <label for="ctl-floor">Readability Floor</label>
+        <div class="range-row">
+          <input type="range" id="ctl-floor" min="3" max="20" value="8">
+          <span class="range-val" id="ctl-floor-val">8 chars</span>
+        </div>
+      </div>
+      <div class="pg-section">
+        <label>State Overrides</label>
+        <div class="override-row"><input type="checkbox" id="ctl-force-empty"><label for="ctl-force-empty">Force empty</label></div>
+        <div class="override-row"><input type="checkbox" id="ctl-force-error"><label for="ctl-force-error">Force error</label></div>
+        <div class="override-row"><input type="checkbox" id="ctl-force-loading"><label for="ctl-force-loading">Force loading</label></div>
+      </div>
+    </div>
+    <div class="pg-resize-handle" id="pg-resize" role="separator" aria-orientation="vertical" aria-valuenow="280" aria-valuemin="120" aria-valuemax="65" tabindex="0" aria-label="Resize playground panel"></div>
+  </div>
+
+  <!-- Main area: Preview + Result -->
+  <div class="main-area">
+    <div class="preview-area" id="preview-area">
+      <div class="nav-bar-container" id="nav-container">
+        <div class="sim-width-label" id="sim-width-label">1280 px</div>
+        <div class="nav-bar" id="nav-bar"></div>
+      </div>
+    </div>
+    <div class="result-resize-handle" id="res-resize" role="separator" aria-orientation="horizontal" aria-valuenow="260" aria-valuemin="100" tabindex="0" aria-label="Resize result panel"></div>
+    <div class="result-wrapper" id="res-wrapper">
+      <div class="result" id="result">
+        <div class="res-summary">
+          <span class="res-verdict" id="res-verdict">PASS</span>
+          <div class="res-info" id="res-info"></div>
+        </div>
+        <div class="pg-flags" id="pg-flags"></div>
+        <div class="res-section-title">Breakpoints</div>
+        <div class="res-metrics" id="res-metrics"></div>
+        <div class="res-section-title">Matrix</div>
+        <div style="overflow:auto; max-height: 300px;">
+          <table class="res-matrix" id="res-matrix"></table>
+        </div>
+        <div class="res-legend"><span>■ PASS (sev 0–1)</span><span>■ WARN (sev 2)</span><span>■ BREAK (sev 3–4)</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Panel toggle buttons -->
+<div class="panel-toggles">
+  <button class="panel-toggle" id="toggle-pg" aria-expanded="true" aria-label="Toggle playground panel" title="Toggle playground">
+    <svg viewBox="0 0 16 16"><rect x="1" y="2" width="5" height="12" rx="1"/><line x1="9" y1="4" x2="15" y2="4"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
+  </button>
+  <button class="panel-toggle" id="toggle-res" aria-expanded="true" aria-label="Toggle result panel" title="Toggle results">
+    <svg viewBox="0 0 16 16"><rect x="2" y="9" width="12" height="5" rx="1"/><line x1="3" y1="3" x2="13" y2="3"/><line x1="3" y1="6" x2="13" y2="6"/></svg>
+  </button>
+</div>
+
+<!-- Machine-readable results (populated by exportResults) -->
+<script type="application/json" id="results-json"></script>
+
+<script>
+"use strict";
+
+/* ===== MEASUREMENT ===== */
+const _measureCanvas = document.createElement("canvas").getContext("2d");
+function measureLabel(text, font) {
+  _measureCanvas.font = font;
+  return _measureCanvas.measureText(text).width;
+}
+const COMPONENT_FONT = `${getComputedStyle(document.documentElement).getPropertyValue("--fw-component").trim() || "400"} ${getComputedStyle(document.documentElement).getPropertyValue("--fs-component").trim() || "14px"} ${getComputedStyle(document.documentElement).getPropertyValue("--ff-component").trim() || "system-ui"}`;
+const ITEM_H_PAD = 20; // 10px each side
+const BAR_H_PAD = 16; // 8px each side
+const GAP = 6;
+const MORE_BTN_BASE_W = 60; // "More" + padding, grows with "+N"
+
+/* ===== DATA ===== */
+const VOCAB = {
+  pinned: [
+    { id: "p1", label: "Dashboard", tier: "pinned", priority: 1 },
+    { id: "p2", label: "Inbox", tier: "pinned", priority: 2 },
+  ],
+  free: [
+    { id: "f1", label: "Appointments", tier: "free", priority: 3 },
+    { id: "f2", label: "Patient Records", tier: "free", priority: 4 },
+    { id: "f3", label: "Billing", tier: "free", priority: 5 },
+    { id: "f4", label: "Referrals", tier: "free", priority: 6 },
+    { id: "f5", label: "Lab Results", tier: "free", priority: 7 },
+    { id: "f6", label: "Prescriptions", tier: "free", priority: 8 },
+    { id: "f7", label: "Documents", tier: "free", priority: 9 },
+    { id: "f8", label: "Care Plans", tier: "free", priority: 10 },
+    { id: "f9", label: "Medication Management", tier: "free", priority: 11 },
+    { id: "f10", label: "Insurance Verification", tier: "free", priority: 12 },
+    { id: "f11", label: "Scheduling", tier: "free", priority: 13 },
+    { id: "f12", label: "Reports", tier: "free", priority: 14 },
+  ],
+  actions: [
+    { id: "a1", label: "Settings", tier: "action", priority: 90 },
+    { id: "a2", label: "Help", tier: "action", priority: 91 },
+  ],
+  longFree: [
+    { id: "lf1", label: "Terminvereinbarungen", tier: "free", priority: 3 },
+    { id: "lf2", label: "Patientenaktenübersicht", tier: "free", priority: 4 },
+    { id: "lf3", label: "Abrechnungsverwaltung", tier: "free", priority: 5 },
+    { id: "lf4", label: "Überweisungsformulare", tier: "free", priority: 6 },
+    { id: "lf5", label: "Laborergebnisberichte", tier: "free", priority: 7 },
+  ],
+  nearDupFree: [
+    { id: "nd1", label: "Patient Notes", tier: "free", priority: 3 },
+    { id: "nd2", label: "Patient Note", tier: "free", priority: 4 },
+    { id: "nd3", label: "Patient Notices", tier: "free", priority: 5 },
+    { id: "nd4", label: "Patients", tier: "free", priority: 6 },
+    { id: "nd5", label: "Patient Info", tier: "free", priority: 7 },
+  ],
+  extremeFree: [
+    { id: "ef1", label: "Comprehensive Medication Reconciliation Overview", tier: "free", priority: 3 },
+    { id: "ef2", label: "Prior Authorization Request Management Dashboard", tier: "free", priority: 4 },
+    { id: "ef3", label: "Interdisciplinary Care Coordination Summary", tier: "free", priority: 5 },
+    { id: "ef4", label: "Advanced Clinical Decision Support Notifications", tier: "free", priority: 6 },
+    { id: "ef5", label: "Automated Insurance Eligibility Verification Status", tier: "free", priority: 7 },
+  ],
+};
+
+function makeItems(free, opts = {}) {
+  const pinned = (opts.pinned || VOCAB.pinned).map(p => ({...p, state: opts.state || "normal"}));
+  const actions = (opts.actions || VOCAB.actions).map(a => ({...a, state: opts.state || "normal"}));
+  const freeItems = free.map((f, i) => {
+    let state = opts.state || "normal";
+    if (opts.stateMap && opts.stateMap[f.id]) state = opts.stateMap[f.id];
+    return {...f, state};
+  });
+  return { pinned, free: freeItems, actions };
+}
+
+/* ===== SCENARIOS ===== */
+const SCENARIOS = [
+  { id: "S1", title: "Everyday — calibration case", description: "5 free items, 2 pinned, 2 actions, normal state, medium labels", state: "normal",
+    items: makeItems(VOCAB.free.slice(0, 5)) },
+  { id: "S2", title: "Empty state", description: "No free items — bar shows only pinned and actions", state: "empty",
+    items: makeItems([]) },
+  { id: "S3", title: "Loading state", description: "Free items replaced by skeleton placeholders", state: "loading",
+    items: makeItems(VOCAB.free.slice(0, 5), { state: "skeleton" }) },
+  { id: "S4", title: "Error state", description: "Error indicator shown in place of free items", state: "error",
+    items: makeItems([], { state: "normal" }), errorMsg: "Failed to load navigation" },
+  { id: "S5", title: "Partial data", description: "Some items missing labels (display as '?')", state: "partial",
+    items: makeItems([
+      { id: "pd1", label: "Appointments", tier: "free", priority: 3 },
+      { id: "pd2", label: "", tier: "free", priority: 4 },
+      { id: "pd3", label: "Billing", tier: "free", priority: 5 },
+      { id: "pd4", label: "", tier: "free", priority: 6 },
+      { id: "pd5", label: "Lab Results", tier: "free", priority: 7 },
+    ]) },
+  { id: "S6", title: "All tiers at cap", description: "12 free items, 2 pinned, 2 actions — maximum load", state: "normal",
+    items: makeItems(VOCAB.free) },
+  { id: "S7", title: "Nothing received", description: "API returned but with no navigation data at all", state: "nothing-received",
+    items: { pinned: [], free: [], actions: [] }, emptyMsg: "No navigation available" },
+  { id: "S8", title: "Long labels (German-length)", description: "German-length labels, +30% typical inflation", state: "normal",
+    items: makeItems(VOCAB.longFree) },
+  { id: "S9", title: "Near-duplicate labels", description: "Labels that differ by one word — 'Patient Notes' vs 'Patient Note'", state: "normal",
+    items: makeItems(VOCAB.nearDupFree) },
+  { id: "S10", title: "Single free item", description: "One free item — minimal content case", state: "normal",
+    items: makeItems(VOCAB.free.slice(0, 1)) },
+  { id: "S11", title: "Maximum overflow", description: "20+ free items — deep overflow menu", state: "normal",
+    items: makeItems([...VOCAB.free, ...VOCAB.free.map((f,i) => ({...f, id: f.id + "b", label: f.label + " (Alt)", priority: f.priority + 20}))]) },
+  { id: "S12", title: "All items disabled", description: "Every item disabled — no interaction possible", state: "normal",
+    items: makeItems(VOCAB.free.slice(0, 5), { state: "disabled" }) },
+  { id: "S13", title: "Active item in overflow", description: "Active item would be pushed to More menu at narrow widths", state: "normal",
+    items: (() => {
+      const items = makeItems(VOCAB.free.slice(0, 8));
+      items.free[6] = { ...items.free[6], state: "active" };
+      return items;
+    })() },
+  { id: "S14", title: "Mixed states", description: "Some disabled, one active, two hidden — realistic complex state", state: "normal",
+    items: (() => {
+      const items = makeItems(VOCAB.free.slice(0, 7));
+      items.free[0].state = "active";
+      items.free[2].state = "disabled";
+      items.free[4].state = "disabled";
+      items.free[5].state = "hidden";
+      return items;
+    })() },
+  { id: "S15", title: "Stress — extreme labels", description: "Every label 40+ characters — deliberate stress test", state: "normal",
+    items: makeItems(VOCAB.extremeFree) },
+  { id: "S16", title: "Stress — all caps at max with loading", description: "12 free skeleton items — maximum loading placeholders", state: "loading",
+    items: makeItems(VOCAB.free, { state: "skeleton" }) },
+];
+
+const WIDTHS = [320, 480, 720, 960, 1280, 1440, 1920];
+
+/* ===== MODEL and LAYOUT ENGINE ===== */
+function itemDisplayLabel(item) {
+  if (item.state === "skeleton") return " ".repeat(8);
+  if (!item.label) return "?";
+  return item.label;
+}
+
+function itemWidth(item, font) {
+  const label = itemDisplayLabel(item);
+  if (item.state === "skeleton") return 70;
+  return Math.ceil(measureLabel(label, font)) + ITEM_H_PAD;
+}
+
+function moreBtnWidth(count, font) {
+  const label = count > 0 ? `More +${count}` : "More";
+  return Math.ceil(measureLabel(label, font)) + ITEM_H_PAD + 4;
+}
+
+function layoutBar(scenario, availableWidth, options = {}) {
+  const font = COMPONENT_FONT;
+  const { pinned, free, actions } = scenario.items;
+  const floor = options.floor || 8;
+  const state = options.forceState || scenario.state;
+  const isNothingReceived = state === "nothing-received" || scenario.emptyMsg;
+  const isError = state === "error" || scenario.errorMsg;
+  const isEmpty = state === "empty" || (free.length === 0 && !isError && !isNothingReceived);
+  const visibleFree = free.filter(f => f.state !== "hidden");
+  const pinnedWidths = pinned.map(p => itemWidth(p, font));
+  const actionWidths = actions.map(a => itemWidth(a, font));
+  const pinnedTotal = pinnedWidths.reduce((s, w) => s + w + GAP, 0);
+  const actionTotal = actionWidths.reduce((s, w) => s + w + GAP, 0);
+  const barPad = BAR_H_PAD;
+  const reservedWidth = barPad + pinnedTotal + actionTotal;
+  const freeSpace = availableWidth - reservedWidth;
+
+  const result = {
+    pinned: pinned.map((p, i) => ({ ...p, displayLabel: itemDisplayLabel(p), width: pinnedWidths[i], truncated: false })),
+    visible: [],
+    overflow: [],
+    actions: actions.map((a, i) => ({ ...a, displayLabel: itemDisplayLabel(a), width: actionWidths[i], truncated: false })),
+    barWidth: availableWidth,
+    overflowAt: null,
+    emptyMsg: null,
+    errorMsg: null,
+    state,
+  };
+
+  if (isNothingReceived) {
+    result.emptyMsg = scenario.emptyMsg || "No items";
+    return result;
+  }
+  if (isError) {
+    result.errorMsg = scenario.errorMsg || "Error loading items";
+    return result;
+  }
+  if (isEmpty || visibleFree.length === 0) {
+    result.emptyMsg = "No items";
+    return result;
+  }
+
+  const freeWidths = visibleFree.map(f => itemWidth(f, font));
+  const totalFreeNeeded = freeWidths.reduce((s, w) => s + w + GAP, 0);
+
+  if (totalFreeNeeded <= freeSpace) {
+    result.visible = visibleFree.map((f, i) => {
+      const dl = itemDisplayLabel(f);
+      const truncated = dl.length < floor && f.state !== "skeleton";
+      return { ...f, displayLabel: dl, width: freeWidths[i], truncated };
+    });
+    return result;
+  }
+
+  const moreW = moreBtnWidth(1, font);
+  let usedWidth = 0;
+  let lastFit = -1;
+  for (let i = 0; i < visibleFree.length; i++) {
+    const needed = freeWidths[i] + GAP + (i < visibleFree.length - 1 ? moreW + GAP : 0);
+    if (usedWidth + freeWidths[i] + GAP + moreW + GAP <= freeSpace) {
+      usedWidth += freeWidths[i] + GAP;
+      lastFit = i;
+    } else {
+      break;
+    }
+  }
+
+  if (lastFit < 0) {
+    if (freeSpace >= moreW + GAP) {
+      result.overflow = visibleFree.map((f, i) => ({ ...f, displayLabel: itemDisplayLabel(f), width: freeWidths[i], truncated: false }));
+      result.overflowAt = availableWidth;
+    } else {
+      result.overflow = visibleFree.map((f, i) => ({ ...f, displayLabel: itemDisplayLabel(f), width: freeWidths[i], truncated: false }));
+      result.overflowAt = availableWidth;
+    }
+    return result;
+  }
+
+  for (let i = 0; i <= lastFit; i++) {
+    const dl = itemDisplayLabel(visibleFree[i]);
+    const truncated = dl.length < floor && visibleFree[i].state !== "skeleton";
+    result.visible.push({ ...visibleFree[i], displayLabel: dl, width: freeWidths[i], truncated });
+  }
+  for (let i = lastFit + 1; i < visibleFree.length; i++) {
+    result.overflow.push({ ...visibleFree[i], displayLabel: itemDisplayLabel(visibleFree[i]), width: freeWidths[i], truncated: false });
+  }
+  result.overflowAt = availableWidth;
+  return result;
+}
+
+/* ===== EVALUATION (FLAG_DEFS and evaluateScenario) ===== */
+const FLAG_DEFS = [
+  { code: "TRUNCATED", name: "Labels ellipsized", severity: 2,
+    test(lr, sc, w, opts) {
+      const floor = opts.floor || 8;
+      const truncated = lr.visible.filter(v => v.state !== "skeleton" && v.displayLabel.length > 0 && v.displayLabel.length < floor);
+      if (truncated.length === 0) return null;
+      return { message: `${truncated.length} label(s) below ${floor}-char readability floor` };
+    }
+  },
+  { code: "OVERFLOW_HIDDEN", name: "Items in overflow menu", severity: 3,
+    test(lr) {
+      if (lr.overflow.length === 0) return null;
+      return { message: `${lr.overflow.length} item(s) hidden in More menu` };
+    }
+  },
+  { code: "ACTIVE_IN_OVERFLOW", name: "Active item hidden in overflow", severity: 3,
+    test(lr) {
+      const active = lr.overflow.find(o => o.state === "active");
+      if (!active) return null;
+      return { message: `Active item "${active.displayLabel}" is in the overflow menu` };
+    }
+  },
+  { code: "PINNED_DISPLACED", name: "Pinned item displaced", severity: 4,
+    test(lr) {
+      const barInner = lr.barWidth - BAR_H_PAD;
+      let x = 0;
+      for (const p of lr.pinned) {
+        x += p.width + GAP;
+        if (x > barInner) return { message: `Pinned item "${p.displayLabel}" pushed beyond available width` };
+      }
+      return null;
+    }
+  },
+  { code: "EMPTY_HIDDEN", name: "Empty state not communicated", severity: 2,
+    test(lr, sc) {
+      if (sc.state !== "empty" && !lr.emptyMsg) return null;
+      if (lr.emptyMsg && lr.visible.length === 0 && lr.overflow.length === 0) return null;
+      if (lr.emptyMsg) return null;
+      if (sc.state === "empty" && lr.visible.length === 0 && !lr.emptyMsg) return { message: "Empty state shows blank bar with no message" };
+      return null;
+    }
+  },
+  { code: "ERROR_OBSCURED", name: "Error indicator obscured", severity: 3,
+    test(lr, sc) {
+      if (sc.state !== "error" && !sc.errorMsg) return null;
+      if (!lr.errorMsg) return null;
+      const errW = measureLabel(lr.errorMsg, COMPONENT_FONT) + ITEM_H_PAD;
+      const avail = lr.barWidth - BAR_H_PAD;
+      if (errW > avail) return { message: "Error message truncated at this width" };
+      return null;
+    }
+  },
+  { code: "LOADING_MISLEADING", name: "Loading skeleton count mismatch", severity: 2,
+    test(lr, sc) {
+      if (sc.state !== "loading") return null;
+      const skeletons = lr.visible.filter(v => v.state === "skeleton");
+      const expected = sc.items.free.length;
+      if (skeletons.length !== expected && lr.overflow.length > 0) return { message: `${skeletons.length} skeletons visible but ${expected} expected — some are in overflow` };
+      return null;
+    }
+  },
+  { code: "PARTIAL_AMBIGUOUS", name: "Missing labels indistinguishable", severity: 2,
+    test(lr) {
+      const partials = lr.visible.filter(v => v.displayLabel === "?");
+      if (partials.length < 2) return null;
+      return { message: `${partials.length} items show "?" — indistinguishable without labels` };
+    }
+  },
+  { code: "READABILITY_FLOOR", name: "Labels below readability floor", severity: 2,
+    test(lr, sc, w, opts) {
+      const floor = opts.floor || 8;
+      const below = lr.visible.filter(v => v.state !== "skeleton" && v.displayLabel.length > 0 && v.displayLabel !== "?" && v.displayLabel.length < floor);
+      if (below.length === 0) return null;
+      return { message: `${below.length} visible label(s) under ${floor} characters` };
+    }
+  },
+  { code: "NEAR_DUPLICATE", name: "Similar labels after truncation", severity: 1,
+    test(lr, sc, w, opts) {
+      const floor = opts.floor || 8;
+      const truncLabels = lr.visible.filter(v => v.displayLabel.length >= floor).map(v => v.displayLabel.substring(0, floor));
+      const seen = new Set();
+      const dups = [];
+      for (const t of truncLabels) { if (seen.has(t)) dups.push(t); seen.add(t); }
+      if (dups.length === 0) return null;
+      return { message: `${dups.length} label pair(s) look identical when truncated to ${floor} chars` };
+    }
+  },
+  { code: "ALL_IN_OVERFLOW", name: "All free items in overflow", severity: 3,
+    test(lr) {
+      if (lr.visible.length > 0 || lr.overflow.length === 0) return null;
+      return { message: `All ${lr.overflow.length} free items are hidden in the overflow menu` };
+    }
+  },
+  { code: "NO_OVERFLOW_INDICATOR", name: "Items hidden without indicator", severity: 4,
+    test(lr) {
+      if (lr.overflow.length === 0) return null;
+      const barInner = lr.barWidth - BAR_H_PAD;
+      let used = lr.pinned.reduce((s, p) => s + p.width + GAP, 0)
+               + lr.visible.reduce((s, v) => s + v.width + GAP, 0)
+               + lr.actions.reduce((s, a) => s + a.width + GAP, 0);
+      const moreW = moreBtnWidth(lr.overflow.length, COMPONENT_FONT);
+      if (used + moreW + GAP > barInner) return { message: `More button cannot fit — ${lr.overflow.length} items hidden with no indication` };
+      return null;
+    }
+  },
+];
+
+function evaluateScenario(scenario, width, options = {}) {
+  const lr = layoutBar(scenario, width, options);
+  const flags = [];
+  for (const fd of FLAG_DEFS) {
+    const result = fd.test(lr, scenario, width, options);
+    if (result) {
+      flags.push({ code: fd.code, name: fd.name, severity: fd.severity, message: result.message });
+    }
+  }
+  const highest = flags.length > 0 ? Math.max(...flags.map(f => f.severity)) : 0;
+  const status = highest >= 3 ? "BREAK" : highest >= 2 ? "WARN" : "PASS";
+  return { status, highestSeverity: highest, flags, layout: lr };
+}
+
+/* ===== CALIBRATION ===== */
+const CALIBRATION = { scenario: "S1", width: 1280, result: "not checked", note: "Pending real-product comparison" };
+
+/* ===== STATE / MODES ===== */
+const pg = { scId: CALIBRATION.scenario, W: CALIBRATION.width, floor: 8, overrides: { forceEmpty: false, forceError: false, forceLoading: false } };
+
+function getEffectiveScenario() {
+  const sc = SCENARIOS.find(s => s.id === pg.scId) || SCENARIOS[0];
+  if (pg.overrides.forceEmpty) return { ...sc, state: "empty", items: { pinned: sc.items.pinned, free: [], actions: sc.items.actions } };
+  if (pg.overrides.forceError) return { ...sc, state: "error", errorMsg: "Error loading items" };
+  if (pg.overrides.forceLoading) return { ...sc, state: "loading", items: { ...sc.items, free: sc.items.free.map(f => ({ ...f, state: "skeleton" })) } };
+  return sc;
+}
+
+/* ===== RENDER ===== */
+let _overflowOpen = false;
+
+function renderBar() {
+  const sc = getEffectiveScenario();
+  const lr = layoutBar(sc, pg.W, { floor: pg.floor, forceState: sc.state });
+  const bar = document.getElementById("nav-bar");
+  const container = document.getElementById("nav-container");
+  container.style.width = pg.W + "px";
+  document.getElementById("sim-width-label").textContent = pg.W + " px";
+  bar.innerHTML = "";
+  _overflowOpen = false;
+
+  // Pinned
+  for (const p of lr.pinned) {
+    const el = document.createElement("div");
+    el.className = `nav-item tier-pinned state-${p.state}`;
+    el.textContent = p.displayLabel;
+    el.title = p.label || p.displayLabel;
+    bar.appendChild(el);
+  }
+
+  // State messages
+  if (lr.errorMsg) {
+    const el = document.createElement("div");
+    el.className = "nav-item state-error";
+    el.textContent = lr.errorMsg;
+    bar.appendChild(el);
+    const spacer = document.createElement("div");
+    spacer.className = "nav-spacer";
+    bar.appendChild(spacer);
+  } else if (lr.emptyMsg && lr.visible.length === 0 && lr.overflow.length === 0) {
+    const el = document.createElement("div");
+    el.className = "nav-empty-msg";
+    el.textContent = lr.emptyMsg;
+    bar.appendChild(el);
+    const spacer = document.createElement("div");
+    spacer.className = "nav-spacer";
+    bar.appendChild(spacer);
+  } else {
+    // Free visible
+    for (const v of lr.visible) {
+      const el = document.createElement("div");
+      el.className = `nav-item tier-free state-${v.state}`;
+      el.textContent = v.displayLabel;
+      el.title = v.label || v.displayLabel;
+      el.style.maxWidth = v.width + "px";
+      bar.appendChild(el);
+    }
+
+    const spacer = document.createElement("div");
+    spacer.className = "nav-spacer";
+    bar.appendChild(spacer);
+
+    // More button
+    if (lr.overflow.length > 0) {
+      const more = document.createElement("div");
+      more.className = "nav-more-btn";
+      more.textContent = `More +${lr.overflow.length}`;
+      more.title = `${lr.overflow.length} more items`;
+      const menu = document.createElement("div");
+      menu.className = "overflow-menu";
+      for (const o of lr.overflow) {
+        const mi = document.createElement("div");
+        mi.className = `overflow-menu-item state-${o.state}`;
+        mi.textContent = o.label || o.displayLabel;
+        mi.title = o.label || o.displayLabel;
+        menu.appendChild(mi);
+      }
+      more.appendChild(menu);
+      more.addEventListener("click", (e) => {
+        e.stopPropagation();
+        _overflowOpen = !_overflowOpen;
+        menu.classList.toggle("open", _overflowOpen);
+      });
+      bar.appendChild(more);
+    }
+  }
+
+  // Actions
+  for (const a of lr.actions) {
+    const el = document.createElement("div");
+    el.className = `nav-item tier-action state-${a.state}`;
+    el.textContent = a.displayLabel;
+    el.title = a.label || a.displayLabel;
+    bar.appendChild(el);
+  }
+
+  // Close overflow on outside click
+  document.addEventListener("click", () => {
+    _overflowOpen = false;
+    const m = bar.querySelector(".overflow-menu");
+    if (m) m.classList.remove("open");
+  }, { once: true });
+}
+
+function renderResult() {
+  const sc = getEffectiveScenario();
+  const ev = evaluateScenario(sc, pg.W, { floor: pg.floor, forceState: sc.state });
+  const verdict = document.getElementById("res-verdict");
+  verdict.textContent = ev.status;
+  verdict.className = `res-verdict ${ev.status.toLowerCase()}`;
+  document.getElementById("res-info").textContent = `${sc.id}: ${sc.title} @ ${pg.W}px — highest severity: ${ev.highestSeverity}`;
+
+  // Flags
+  const flagsEl = document.getElementById("pg-flags");
+  flagsEl.innerHTML = "";
+  if (ev.flags.length === 0) {
+    flagsEl.innerHTML = '<div class="flag" style="color:#555">No flags at this combination.</div>';
+  } else {
+    for (const f of ev.flags) {
+      const div = document.createElement("div");
+      div.className = "flag";
+      div.innerHTML = `<span class="flag-sev s${f.severity}">${f.severity}</span> <strong>${f.code}</strong>: ${f.message}`;
+      flagsEl.appendChild(div);
+    }
+  }
+
+  // Breakpoints
+  renderBreakpoints(sc);
+}
+
+function renderBreakpoints(sc) {
+  const metricsEl = document.getElementById("res-metrics");
+  const bp = computeBreakpoints(sc);
+  const parts = [];
+  if (bp.overflowAt !== null) parts.push(`Overflow starts: ${bp.overflowAt}px`);
+  else parts.push("Overflow starts: never");
+  if (bp.noTruncationFrom !== null) parts.push(`No truncation from: ${bp.noTruncationFrom}px`);
+  else parts.push("No truncation from: never");
+  if (bp.allInOverflowBelow !== null) parts.push(`All in overflow below: ${bp.allInOverflowBelow}px`);
+  metricsEl.textContent = parts.join(" · ");
+}
+
+function computeBreakpoints(sc) {
+  const opts = { floor: pg.floor };
+  let overflowAt = null, noTruncationFrom = null, allInOverflowBelow = null;
+
+  // Binary search: find the width where overflow first appears (searching downward)
+  let lo = 200, hi = 2400;
+  while (lo < hi) {
+    const mid = Math.floor((lo + hi) / 2);
+    const lr = layoutBar(sc, mid, opts);
+    if (lr.overflow.length > 0) lo = mid + 1;
+    else hi = mid;
+  }
+  if (lo > 200 && lo <= 2400) overflowAt = lo - 1;
+
+  // Find width where truncation clears
+  lo = 200; hi = 2400;
+  while (lo < hi) {
+    const mid = Math.floor((lo + hi) / 2);
+    const ev = evaluateScenario(sc, mid, opts);
+    const hasTrunc = ev.flags.some(f => f.code === "TRUNCATED" || f.code === "READABILITY_FLOOR");
+    if (hasTrunc) lo = mid + 1;
+    else hi = mid;
+  }
+  if (lo > 200 && lo <= 2400) noTruncationFrom = lo;
+  else if (lo === 200) noTruncationFrom = 200;
+
+  // Find width where all items go to overflow
+  lo = 200; hi = 2400;
+  while (lo < hi) {
+    const mid = Math.floor((lo + hi) / 2);
+    const lr = layoutBar(sc, mid, opts);
+    if (lr.visible.length === 0 && lr.overflow.length > 0) lo = mid + 1;
+    else hi = mid;
+  }
+  if (lo > 200 && lo <= 2400) allInOverflowBelow = lo - 1;
+
+  return { overflowAt, noTruncationFrom, allInOverflowBelow };
+}
+
+/* ===== exportResults() ===== */
+function exportResults() {
+  const allResults = [];
+  const allBreakpoints = [];
+  const tally = { PASS: 0, WARN: 0, BREAK: 0 };
+
+  for (const sc of SCENARIOS) {
+    const bp = computeBreakpoints(sc);
+    allBreakpoints.push({ scenario: sc.id, ...bp });
+    for (const w of WIDTHS) {
+      const ev = evaluateScenario(sc, w, { floor: pg.floor });
+      allResults.push({
+        scenario: sc.id,
+        title: sc.title,
+        width: w,
+        status: ev.status,
+        highestSeverity: ev.highestSeverity,
+        flags: ev.flags,
+      });
+      tally[ev.status]++;
+    }
+  }
+
+  const data = {
+    title: "Three-tier navigation bar — scenario mould reference",
+    scenarios: SCENARIOS.map(s => ({ id: s.id, title: s.title, state: s.state })),
+    widths: WIDTHS,
+    options: { floor: pg.floor },
+    severityScale: { "0": "Not a problem", "1": "Cosmetic", "2": "Minor", "3": "Major", "4": "Catastrophe" },
+    calibration: { ...CALIBRATION },
+    results: allResults,
+    breakpoints: allBreakpoints,
+    tally,
+  };
+
+  document.getElementById("results-json").textContent = JSON.stringify(data, null, 2);
+  return data;
+}
+
+/* ===== MATRIX RENDER ===== */
+function renderMatrix() {
+  const data = exportResults();
+  const table = document.getElementById("res-matrix");
+  table.innerHTML = "";
+  const thead = document.createElement("thead");
+  const hrow = document.createElement("tr");
+  const th0 = document.createElement("th");
+  th0.textContent = "Scenario";
+  hrow.appendChild(th0);
+  for (const w of WIDTHS) {
+    const th = document.createElement("th");
+    th.textContent = w + "px";
+    hrow.appendChild(th);
+  }
+  thead.appendChild(hrow);
+  table.appendChild(thead);
+  const tbody = document.createElement("tbody");
+  for (const sc of SCENARIOS) {
+    const row = document.createElement("tr");
+    const tdLabel = document.createElement("td");
+    tdLabel.className = "sc-label";
+    tdLabel.textContent = `${sc.id}: ${sc.title}`;
+    tdLabel.title = sc.description;
+    row.appendChild(tdLabel);
+    for (const w of WIDTHS) {
+      const r = data.results.find(r => r.scenario === sc.id && r.width === w);
+      const td = document.createElement("td");
+      td.className = `cell ${r.status.toLowerCase()}`;
+      td.dataset.sc = sc.id;
+      td.dataset.w = w;
+      td.textContent = r.status;
+      const flagTitles = r.flags.map(f => `[${f.severity}] ${f.name}: ${f.message}`).join("\n");
+      td.title = flagTitles || "No issues";
+      td.addEventListener("click", () => {
+        pg.scId = sc.id;
+        pg.W = w;
+        syncControls();
+        render();
+      });
+      row.appendChild(td);
+    }
+    tbody.appendChild(row);
+  }
+  table.appendChild(tbody);
+}
+
+/* ===== CONTROLS ===== */
+function initControls() {
+  const scSel = document.getElementById("ctl-scenario");
+  for (const sc of SCENARIOS) {
+    const opt = document.createElement("option");
+    opt.value = sc.id;
+    opt.textContent = `${sc.id}: ${sc.title}`;
+    scSel.appendChild(opt);
+  }
+  scSel.value = pg.scId;
+  scSel.addEventListener("change", () => { pg.scId = scSel.value; render(); });
+
+  const wSel = document.getElementById("ctl-width");
+  for (const w of WIDTHS) {
+    const opt = document.createElement("option");
+    opt.value = w;
+    opt.textContent = w + "px";
+    wSel.appendChild(opt);
+  }
+  wSel.value = pg.W;
+  wSel.addEventListener("change", () => { pg.W = parseInt(wSel.value); render(); });
+
+  const floorCtl = document.getElementById("ctl-floor");
+  floorCtl.value = pg.floor;
+  document.getElementById("ctl-floor-val").textContent = pg.floor + " chars";
+  floorCtl.addEventListener("input", () => {
+    pg.floor = parseInt(floorCtl.value);
+    document.getElementById("ctl-floor-val").textContent = pg.floor + " chars";
+    render();
+  });
+
+  document.getElementById("ctl-force-empty").addEventListener("change", (e) => { pg.overrides.forceEmpty = e.target.checked; render(); });
+  document.getElementById("ctl-force-error").addEventListener("change", (e) => { pg.overrides.forceError = e.target.checked; render(); });
+  document.getElementById("ctl-force-loading").addEventListener("change", (e) => { pg.overrides.forceLoading = e.target.checked; render(); });
+}
+
+function syncControls() {
+  document.getElementById("ctl-scenario").value = pg.scId;
+  document.getElementById("ctl-width").value = pg.W;
+  document.getElementById("ctl-floor").value = pg.floor;
+  document.getElementById("ctl-floor-val").textContent = pg.floor + " chars";
+  document.getElementById("ctl-force-empty").checked = pg.overrides.forceEmpty;
+  document.getElementById("ctl-force-error").checked = pg.overrides.forceError;
+  document.getElementById("ctl-force-loading").checked = pg.overrides.forceLoading;
+  const sc = SCENARIOS.find(s => s.id === pg.scId);
+  document.getElementById("ctl-scenario-desc").textContent = sc ? sc.description : "";
+}
+
+function render() {
+  syncControls();
+  renderBar();
+  renderResult();
+  renderMatrix();
+}
+
+/* ===== PANEL TOGGLES ===== */
+function initToggles() {
+  const pgToggle = document.getElementById("toggle-pg");
+  const resToggle = document.getElementById("toggle-res");
+  const pgWrapper = document.getElementById("pg-wrapper");
+  const resWrapper = document.getElementById("res-wrapper");
+
+  pgToggle.addEventListener("click", () => {
+    const expanded = pgToggle.getAttribute("aria-expanded") === "true";
+    pgToggle.setAttribute("aria-expanded", !expanded);
+    pgToggle.title = expanded ? "Show playground" : "Toggle playground";
+    pgWrapper.classList.toggle("collapsed", expanded);
+    document.getElementById("playground").classList.toggle("collapsed", expanded);
+    document.getElementById("pg-resize").style.display = expanded ? "none" : "";
+  });
+
+  resToggle.addEventListener("click", () => {
+    const expanded = resToggle.getAttribute("aria-expanded") === "true";
+    resToggle.setAttribute("aria-expanded", !expanded);
+    resToggle.title = expanded ? "Show results" : "Toggle results";
+    resWrapper.classList.toggle("collapsed", expanded);
+  });
+}
+
+/* ===== DRAG RESIZING ===== */
+function initResize() {
+  const pgResize = document.getElementById("pg-resize");
+  const pgWrapper = document.getElementById("pg-wrapper");
+  const resResize = document.getElementById("res-resize");
+  const resWrapper = document.getElementById("res-wrapper");
+  const mainArea = document.querySelector(".main-area");
+
+  // Playground horizontal resize
+  let pgDragging = false, pgStartX = 0, pgStartW = 0;
+  pgResize.addEventListener("mousedown", (e) => {
+    pgDragging = true;
+    pgStartX = e.clientX;
+    pgStartW = pgWrapper.offsetWidth;
+    pgResize.classList.add("dragging");
+    e.preventDefault();
+  });
+  document.addEventListener("mousemove", (e) => {
+    if (!pgDragging) return;
+    const delta = e.clientX - pgStartX;
+    const newW = Math.max(120, Math.min(window.innerWidth * 0.65, pgStartW + delta));
+    pgWrapper.style.width = newW + "px";
+    pgResize.setAttribute("aria-valuenow", Math.round(newW));
+  });
+  document.addEventListener("mouseup", () => {
+    if (pgDragging) { pgDragging = false; pgResize.classList.remove("dragging"); }
+  });
+  pgResize.addEventListener("keydown", (e) => {
+    const step = e.shiftKey ? 40 : 10;
+    const cur = pgWrapper.offsetWidth;
+    if (e.key === "ArrowRight") { pgWrapper.style.width = Math.min(window.innerWidth * 0.65, cur + step) + "px"; e.preventDefault(); }
+    if (e.key === "ArrowLeft") { pgWrapper.style.width = Math.max(120, cur - step) + "px"; e.preventDefault(); }
+  });
+
+  // Result vertical resize
+  let resDragging = false, resStartY = 0, resStartH = 0;
+  resResize.addEventListener("mousedown", (e) => {
+    resDragging = true;
+    resStartY = e.clientY;
+    resStartH = resWrapper.offsetHeight;
+    resResize.classList.add("dragging");
+    e.preventDefault();
+  });
+  document.addEventListener("mousemove", (e) => {
+    if (!resDragging) return;
+    const delta = resStartY - e.clientY;
+    const maxH = mainArea.offsetHeight - 20 - 4; // 20px preview min, 4px gap
+    const newH = Math.max(100, Math.min(maxH, resStartH + delta));
+    resWrapper.style.height = newH + "px";
+    resResize.setAttribute("aria-valuenow", Math.round(newH));
+  });
+  document.addEventListener("mouseup", () => {
+    if (resDragging) { resDragging = false; resResize.classList.remove("dragging"); }
+  });
+  resResize.addEventListener("keydown", (e) => {
+    const step = e.shiftKey ? 40 : 10;
+    const cur = resWrapper.offsetHeight;
+    const maxH = mainArea.offsetHeight - 20 - 4;
+    if (e.key === "ArrowUp") { resWrapper.style.height = Math.min(maxH, cur + step) + "px"; e.preventDefault(); }
+    if (e.key === "ArrowDown") { resWrapper.style.height = Math.max(100, cur - step) + "px"; e.preventDefault(); }
+  });
+}
+
+/* ===== window.scenarioLab ADAPTER ===== */
+window.scenarioLab = {
+  ready: false,
+  snapshot() {
+    return {
+      scenario: pg.scId,
+      width: pg.W,
+      overrides: { ...pg.overrides },
+      results: JSON.parse(document.getElementById("results-json").textContent || "{}"),
+    };
+  },
+  setCase(scenario, width) {
+    pg.scId = scenario;
+    pg.W = width;
+    pg.overrides = { forceEmpty: false, forceError: false, forceLoading: false };
+    render();
+  },
+  measurements() {
+    const sc = getEffectiveScenario();
+    const lr = layoutBar(sc, pg.W, { floor: pg.floor, forceState: sc.state });
+    const samples = [];
+    for (const v of lr.visible) {
+      if (v.state === "skeleton") continue;
+      const expected = Math.ceil(measureLabel(v.displayLabel, COMPONENT_FONT)) + ITEM_H_PAD;
+      const domItem = [...document.querySelectorAll(".nav-item.tier-free")].find(el => el.textContent === v.displayLabel);
+      const actual = domItem ? domItem.getBoundingClientRect().width : null;
+      samples.push({ label: v.displayLabel, expected, actual: actual ? Math.round(actual) : null, matches: actual ? Math.abs(expected - actual) <= 1 : false });
+    }
+    return samples;
+  },
+  interactions: {
+    get scenario() { return pg.scId; },
+    get width() { return pg.W; },
+    get overflowMenuSelector() { return ".overflow-menu"; },
+    get tooltipVisible() { return true; },
+    get overflowAccessible() {
+      const more = document.querySelector(".nav-more-btn");
+      return more !== null;
+    },
+  },
+};
+
+/* ===== INIT ===== */
+document.fonts.ready.then(() => {
+  initControls();
+  initToggles();
+  initResize();
+  pg.scId = CALIBRATION.scenario;
+  pg.W = CALIBRATION.width;
+  render();
+  window.scenarioLab.ready = true;
+});
+</script>
+</body>
+</html>
