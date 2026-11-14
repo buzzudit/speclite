@@ -136,6 +136,14 @@ When you scaffold:
 
 For existing repos, merge intentionally. Do not duplicate policies or create parallel systems unless the user explicitly wants a reset.
 
+## Version Control Guidance
+
+When Speclite spawns or bootstraps a project:
+
+- **Create a local repo if not present.** If the target directory is not already a git repository, run `git init` and make an initial commit with the scaffolded files before proceeding. A project without version control from the start loses history that matters later.
+- **Commit often.** The agent should commit automatically after completing each meaningful unit of work — a story, a planning doc, a scaffold pass, a fix. Small, frequent commits are cheaper than reconstructing intent from a large diff. Do not batch unrelated changes or wait for the user to ask.
+- **Suggest a push after major work.** After completing a significant milestone — a module scaffold, a batch of stories, a bootstrap step, a skill installation — remind the user to push to the remote if one is configured. The agent should not push without the user's confirmation, but should surface the prompt so work is not stranded locally.
+
 ## Story-Driven Execution Protocol
 
 No implementation without a story when the repo uses story management.
