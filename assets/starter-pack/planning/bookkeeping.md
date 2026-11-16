@@ -37,6 +37,12 @@ Do not put planning drafts, step files, screenshots, exports, build output, or d
 - Use `stories/` for markdown-first work tracking.
 - Treat `planning/story-management.md` as authoritative for story areas, statuses, and movement rules.
 
+## Tech Stack Rules
+
+- Maintain `planning/tech-stack.md` as the canonical technology inventory.
+- Update it atomically whenever a dependency, provider, or infrastructure service is added, removed, or upgraded.
+- Keep versions current — stale version numbers are worse than none.
+
 ## Progress Rules
 
 - Maintain overall project status in `progress.md`.
@@ -54,6 +60,7 @@ Do not put planning drafts, step files, screenshots, exports, build output, or d
 - `app/`
 - `assets/`
 - `docs/`
+- `moulds/`
 
 Create folders only when they support actual project structure.
 

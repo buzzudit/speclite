@@ -48,6 +48,12 @@ Use for behavior-changing stories. For trivial or non-behavioral work, `Not appl
 
 - Relevant links, assumptions, or decisions.
 
+## Decisions
+
+Use for stories that resolve open questions or make non-obvious choices. Record each decision with brief rationale so it stays discoverable at the story level.
+
+- Not applicable.
+
 ## Done Evidence
 
 - Before commit:

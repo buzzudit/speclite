@@ -42,6 +42,25 @@ Use these statuses only:
 - `blocked`
 - `parked`
 
+## Story Series
+
+Projects with multiple phases or surfaces can use prefixed story series to signal scope and urgency at a glance. Each series gets its own prefix and groups separately in the index.
+
+Example series:
+
+| Prefix | Meaning | Posture |
+|---|---|---|
+| `ra-` | Core app | Implement now |
+| `ms-` | Marketing site | Implement now |
+| `pl-` | Post-launch | Write spec only, implement later |
+| `sm-` | Early prototype | May be superseded |
+
+Conventions:
+
+- Define series in this file when the project outgrows a single prefix.
+- Group stories by series in `stories/index.md` (e.g., "## Ready — Core App (RA series)").
+- The default `qm-` prefix works for single-series projects.
+
 ## Story File Template
 
 Use `stories/story-template.md` or the starter template bundled with the skill as the baseline structure.

@@ -44,8 +44,11 @@ mould. When guided testing is requested, load `references/designer-testing.md`.
 
 If called from a larger workflow (a usability review, a design sprint, a story):
 inherit the work item and research question and place output accordingly.
-Standalone use is supported — agree an output folder with the user; no calling
-workflow is required.
+Standalone use is supported — the recommended output folder is `moulds/` at the
+project root (listed in `planning/bookkeeping.md` as a suggested top-level
+folder). Place HTML moulds and Markdown reports there. Use a `shared-data.md`
+file in `moulds/` for content shared across multiple moulds (e.g., common
+personas, shared scenario bounds).
 
 Pairs well with a usability heuristic evaluation and a UX-copy audit; all three
 share the severity scale below and can feed the same design review.

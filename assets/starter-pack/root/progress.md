@@ -15,7 +15,9 @@ Last Updated: {{DATE}}
 
 ## Recent Decisions
 
-- This repo uses a lightweight project operating model with explicit planning and verification.
+Record decisions with dates, rationale, and what was discarded. This prevents re-litigating settled questions.
+
+- {{DATE}}: This repo uses a lightweight project operating model with explicit planning and verification. Rationale: single-person team needs low overhead with explicit checkpoints. Discarded: Jira/Linear (too heavy), no tracking (too informal).
 
 ## Next Actions
 

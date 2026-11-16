@@ -433,6 +433,39 @@ or customer/patient/employee data in the evaluation or in any artifact it
 produces. Remind users to follow their organization's data-handling guidance when
 sharing screenshots or materials.
 
+## Re-evaluation
+
+A heuristic evaluation is not one-and-done. Re-run it incrementally after major
+changes to catch regressions and new issues introduced by the change.
+
+### When to re-evaluate
+
+- After adding persistence or changing the data layer (new save/load/error paths)
+- After a UI refactor that changes layout, navigation, or interaction patterns
+- After adding a new screen or major feature
+- Before a launch or milestone gate
+
+### Scoping an incremental evaluation
+
+An incremental evaluation covers only the changed behavior and its immediate
+neighbors — not the entire product.
+
+1. Identify which screens and flows were affected by the change.
+2. Run the full 12-heuristic pass on those screens only.
+3. Pay special attention to heuristics most likely affected by the change type:
+   - Persistence changes → H1 (Visibility), H5 (Error Prevention), H9 (Error Recovery)
+   - Layout changes → H4 (Consistency), H8 (Aesthetic and Minimalist Design)
+   - New features → H2 (Match with Real World), H6 (Recognition), H10 (Help)
+4. Flag any finding that was marked "not applicable" in the prior evaluation but
+   is now relevant because of the change.
+5. Note false positives from the prior evaluation that the change resolved.
+
+### Recording incremental results
+
+Save incremental evaluations alongside the original (e.g., in `evaluations/`).
+Reference the triggering story or change. The incremental report should note
+which prior findings were re-checked, which are resolved, and which are new.
+
 ## Severity scale (shared)
 
 This evaluation uses the same 0–4 Nielsen Norman Group severity scale as the
