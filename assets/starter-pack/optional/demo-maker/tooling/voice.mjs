@@ -35,6 +35,7 @@ export async function generate() {
   let spent = 0
   for (let i = 0; i < beats.length; i++) {
     const b = beats[i]
+    if (!b.text) continue // silent beats (splash cards) — no voice clip
     if (process.env.ONLY && !process.env.ONLY.split(',').includes(b.id)) continue
     const file = clipPath(b)
     if (fs.existsSync(file)) { console.log(`cached  ${b.id}`); continue }
@@ -54,11 +55,17 @@ export async function generate() {
       const body = (await res.text()).slice(0, 300)
       throw new Error(`ElevenLabs ${res.status} on beat ${b.id}: ${body}`)
     }
-    fs.writeFileSync(file, Buffer.from(await res.arrayBuffer()))
+    // Write raw, then fade out last 80ms to remove end-of-clip blip
+    const raw = file + '.raw.mp3'
+    fs.writeFileSync(raw, Buffer.from(await res.arrayBuffer()))
+    const rawDur = duration(raw)
+    const fadeStart = Math.max(0, rawDur - 0.08)
+    spawnSync('ffmpeg', ['-y', '-i', raw, '-af', `afade=t=out:st=${fadeStart}:d=0.08`, '-c:a', 'libmp3lame', '-q:a', '2', file], { stdio: 'pipe' })
+    fs.unlinkSync(raw)
     spent += b.text.length
     console.log(`made    ${b.id}  ${duration(file).toFixed(2)}s`)
   }
   console.log(`characters sent this run: ${spent}`)
 }
 
-if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, '/')}`) await generate()
+if (process.argv[1] && import.meta.url === `file:///${process.argv[1].replace(/\\/g, '/')}`) await generate()

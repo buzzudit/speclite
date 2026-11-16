@@ -8,27 +8,46 @@ import path from 'node:path'
 export const BASE = process.env.TOUR_URL ?? 'http://localhost:5173'
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
+// Brand color tokens — replace these with the product's actual palette.
+// Read them from globals.css, CSS custom properties, or the marketing site.
+// See planning/demo-maker-workflows.md, "Brand colors" for guidance.
+const COLORS = {
+  accent: '#6366f1',       // ripple border, card gradient start
+  accentLight: '#818cf8',  // chapter bold, caption bold, card gradient end
+  accentRgb: '99,102,241', // accent as r,g,b for rgba()
+  background: '#09090b',   // card background
+  foreground: '#fafafa',   // card text
+  muted: '#a1a1aa',        // card paragraph, secondary text
+}
+
 const overlay = () => {
   const css = document.createElement('style')
   css.textContent = `
     #tour-cursor{position:fixed;z-index:2147483647;pointer-events:none;width:22px;height:22px;left:0;top:0;margin:-3px 0 0 -3px;transition:transform 40ms linear}
-    #tour-ripple{position:fixed;z-index:2147483646;pointer-events:none;width:34px;height:34px;border-radius:50%;border:3px solid #0f766e;background:rgba(15,118,110,.18);opacity:0;transform:translate(-50%,-50%) scale(.4)}
+    #tour-ripple{position:fixed;z-index:2147483646;pointer-events:none;width:34px;height:34px;border-radius:50%;border:3px solid ${COLORS.accent};background:rgba(${COLORS.accentRgb},.18);opacity:0;transform:translate(-50%,-50%) scale(.4)}
     #tour-ripple.go{animation:tourRipple 520ms ease-out}
     @keyframes tourRipple{0%{opacity:.95;transform:translate(-50%,-50%) scale(.4)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.9)}}
     #tour-caption{position:fixed;z-index:2147483645;left:50%;bottom:26px;transform:translateX(-50%);max-width:880px;padding:10px 18px;border-radius:10px;background:rgba(17,24,28,.92);color:#fff;font:500 16px/1.35 Inter,system-ui,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.25);opacity:0;transition:opacity 220ms;text-align:center}
     #tour-caption.on{opacity:1}
     #tour-chapter{position:fixed;z-index:2147483645;left:28px;bottom:26px;padding:8px 14px;border-radius:8px;background:rgba(17,24,28,.9);color:#fff;font:600 14px/1.2 Inter,system-ui,sans-serif;letter-spacing:.01em;opacity:0;transform:translateY(6px);transition:opacity 260ms,transform 260ms}
     #tour-chapter.on{opacity:1;transform:none}
-    #tour-chapter b{color:#5eead4;margin-right:8px}
-    #tour-card{position:fixed;inset:0;z-index:2147483640;background:#0f1418;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;font-family:Inter,system-ui,sans-serif;text-align:center;padding:60px}
+    #tour-chapter b{color:${COLORS.accentLight};margin-right:8px}
+    #tour-card{position:fixed;inset:0;z-index:2147483640;background:${COLORS.background};color:${COLORS.foreground};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;font-family:Inter,system-ui,sans-serif;text-align:center;padding:60px}
     #tour-card.fade{transition:opacity 700ms;opacity:0}
     #tour-card h1{font-size:56px;font-weight:600;letter-spacing:-.02em;margin:0}
-    #tour-card h1 em{font-style:normal;color:#5eead4}
-    #tour-card p{font-size:22px;color:#a9b3bf;margin:0;max-width:820px;line-height:1.45}
+    #tour-card h1 em{font-style:normal;background:linear-gradient(135deg,${COLORS.accent},${COLORS.accentLight});-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    #tour-card p{font-size:22px;color:${COLORS.muted};margin:0;max-width:820px;line-height:1.45}
     #tour-card ol{list-style:none;padding:0;margin:8px 0 0;display:flex;flex-direction:column;gap:14px;max-width:880px;text-align:left}
     #tour-card li{font-size:24px;line-height:1.35;display:flex;gap:16px;align-items:baseline}
-    #tour-card li b{color:#5eead4;font-weight:600;font-size:22px}
-    #tour-caption b{color:#5eead4;font-weight:600;margin-right:8px}`
+    #tour-card li b{color:${COLORS.accentLight};font-weight:600;font-size:22px}
+    #tour-caption b{color:${COLORS.accentLight};font-weight:600;margin-right:8px}
+    .badge{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:999px;border:1px solid rgba(${COLORS.accentRgb},.25);font-size:12px;letter-spacing:.08em;color:${COLORS.muted};font-weight:500}
+    .badge .dot{width:6px;height:6px;border-radius:50%;background:${COLORS.accent}}
+    .glow{position:absolute;width:400px;height:400px;border-radius:50%;filter:blur(120px);opacity:.15;animation:cardGlow 4s ease-in-out infinite alternate;pointer-events:none}
+    .cta-btn{display:inline-flex;padding:14px 32px;border-radius:999px;background:linear-gradient(135deg,${COLORS.accent},${COLORS.accentLight});color:#fff;font-size:16px;font-weight:600;letter-spacing:.01em}
+    [data-anim]{opacity:0;transform:translateY(16px);animation:cardFadeUp .6s ease forwards}
+    @keyframes cardFadeUp{to{opacity:1;transform:none}}
+    @keyframes cardGlow{0%{opacity:.12;transform:scale(1)}100%{opacity:.2;transform:scale(1.15)}}`
   const add = () => {
     document.head.appendChild(css)
     const cur = document.createElement('div')

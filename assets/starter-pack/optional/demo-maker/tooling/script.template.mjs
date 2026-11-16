@@ -13,8 +13,9 @@ export const MODEL_ID = 'eleven_v3'
 export const VOICE_SETTINGS = { stability: 0.3, similarity_boost: 0.75, style: 0.4, use_speaker_boost: true }
 
 // Ids are used by walkthrough.mjs. Keep each line to one idea; the action for the beat starts when the line starts.
+// A beat with `text: null` is a silent beat (splash card) — no voice clip is generated and it uses SPLASH_DUR for timing.
 export const beats = [
-  { id: 'T0', text: "[calm] {{Title line: what this is, and who it is for.}} [short pause] [curious] {{What you will show... and the questions that are STILL open.}}" },
+  { id: 'T0', text: null }, // silent: branded splash card shown as frame 1; login happens behind it
   { id: 'P1', text: "[curious] {{Meet the persona.}} [short pause] [thoughtful] {{The moment that starts the job...}} [serious] {{and the decision they have to make.}}" },
   { id: 'P2', text: "[thoughtful] {{The pain today.}} [short pause] [curious] {{The question the product asks FIRST?}} [calm] {{The one thing it changes.}}" },
   // ... one beat per action in the storyboard; make the "so what" beat the strongest contrast ...

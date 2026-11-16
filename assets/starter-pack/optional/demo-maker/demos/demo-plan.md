@@ -11,6 +11,13 @@ Last Updated: {{DATE}}
 - Length target: {{MINUTES}} minutes, about {{BEATS}} beats
 - Format: 1280 x 720 mp4 (H.264 and AAC)
 
+## Preflight
+
+- [ ] App runs and login succeeds with the demo account
+- [ ] Demo account lands on the expected page (not onboarding, redirect, or error)
+- [ ] Seed data exists for the journey (practice records, linking tables, demo data)
+- [ ] Core workflow is exercisable end-to-end (the primary action — submit, send, approve, create — works)
+
 ## Journey
 
 Persona: {{NAME, role, team size}}
@@ -46,7 +53,16 @@ Numbers and units are written as words. Tags are directions and are not spoken.
 
 - How the demo resets to a clean state:
 - Fictional data used and where it lives:
-- Selectors used (prefer `data-demo-*`):
+- Selectors used (prefer text-based Playwright locators; fall back to `data-demo-*`):
+
+## Background Music
+
+- Track: {{TRACK_NAME}}
+- Author: {{AUTHOR}}
+- Source: {{URL}} (royalty-free)
+- License: {{LICENSE}}
+- Mix level: −20 dB below narration
+- Looping: crossfade if shorter than video
 
 ## Sync Plan
 
@@ -56,12 +72,17 @@ Numbers and units are written as words. Tags are directions and are not spoken.
 
 ## Acceptance Criteria
 
+- [ ] Preflight passed: app runs, demo account lands correctly, seed data present
+- [ ] Storyboard covers the core workflow end-to-end (not just a tour of screens)
 - [ ] Script approved by the owner before voice generation
 - [ ] Script has intonation: every multi-sentence line shifts feeling, openers vary, the "so what" beat has the strongest contrast
-- [ ] Voice clips generated, one per beat, cached
+- [ ] Voice clips generated, one per beat, cached; 80 ms fade-out applied
 - [ ] Recorder runs the whole workflow from a clean state in one command
+- [ ] Splash card is frame 1; login happens behind it
 - [ ] mp4 written with each clip at its beat's calibrated time
+- [ ] Background music mixed at −20 dB (if applicable)
 - [ ] Sync verified: length, calibration residuals, frames at beat starts, audio onsets
+- [ ] No end-of-clip blips audible
 - [ ] Listened to once by a person; unverified items recorded
 - [ ] Video delivered; re-recording is one command
 

@@ -47,16 +47,17 @@ If the product does not carry the journey, fix the product first. Narration cann
 ## Pipeline
 
 ```
-storyboard (beats) -> script -> voice clips -> record -> calibrate -> mux -> verify
+preflight -> storyboard (beats) -> script -> voice clips -> record -> calibrate -> mux (+ bg music) -> verify
 ```
 
-1. **Storyboard.** One table: beat id, scene, what happens on screen, what the narrator says. One idea per beat. Aim for 12 to 25 beats and 3 to 5 minutes.
-2. **Script approval.** The narration text is sent to the voice service. Get the owner's approval of the script before spending credits.
-3. **Voice clips.** Generate one clip per beat. Cache by text, voice, model and settings so unchanged lines cost nothing on re-runs. Measure every clip's length.
-4. **Record.** Run the real app in headless Chromium. At the start of each beat, start its action and note the clock time. A beat lasts as long as its clip plus a short pause, or as long as its action if that is longer. Write actions to finish before the line does.
-5. **Calibrate.** Picture time is not the same as the clock. Find high-contrast moments in the recorded video (the dark title card, the dark closing card, chapter labels) whose clock times you noted, and fit picture time against clock time. The offset has been measured at 0.2 s on one run and 2.9 s on the next, so always calibrate; never assume.
-6. **Mux.** Place each clip at its beat's calibrated time, mix, and write H.264 plus AAC. Trim the silent tail after the last line.
-7. **Verify.** See the checklist below.
+1. **Preflight.** Run the app, log in with the demo account, and confirm the demo account lands on the expected page — not an onboarding flow, a redirect, or an error. If seed data is missing (for example a practice field, a linking table, or demo records the journey needs), fix the seed before proceeding. This catches problems that would waste a full recording.
+2. **Storyboard.** One table: beat id, scene, what happens on screen, what the narrator says. One idea per beat. Aim for 12 to 25 beats and 3 to 5 minutes. The storyboard must cover the product's primary happy path end-to-end — not just a tour of screens. If the product's core action is "submit", "send", "approve" or "create", that action must appear as a beat.
+3. **Script approval.** The narration text is sent to the voice service. Get the owner's approval of the script before spending credits. This is a hard gate — it catches missing beats, wrong persona, flat narration and scope creep before anything costs money.
+4. **Voice clips.** Generate one clip per beat. Cache by text, voice, model and settings so unchanged lines cost nothing on re-runs. Measure every clip's length. Apply an 80 ms fade-out to every clip after download to remove end-of-clip blips (ElevenLabs clips consistently end with a small artifact).
+5. **Record.** Run the real app in headless Chromium. At the start of each beat, start its action and note the clock time. A beat lasts as long as its clip plus a short pause, or as long as its action if that is longer. Write actions to finish before the line does. Show the branded splash card as frame 1; log in behind it so the video never opens on a login screen.
+6. **Calibrate.** Picture time is not the same as the clock. Find high-contrast moments in the recorded video (the dark title card, the dark closing card, chapter labels) whose clock times you noted, and fit picture time against clock time. The offset has been measured at 0.2 s on one run and 2.9 s on the next, so always calibrate; never assume.
+7. **Mux.** Place each clip at its beat's calibrated time, mix, and write H.264 plus AAC. Trim the silent tail after the last line. If a background music track is provided, loop it with crossfade at the joins, mix at −20 dB below narration, and fade in over the first 2 s and out over the last 3 s.
+8. **Verify.** See the checklist below.
 
 Files the tooling uses (copy from `tooling/` into `tour/` in the project):
 
@@ -104,12 +105,56 @@ A flat read is a defect, not a neutral default. The narration must have intonati
 - After generating, listen for variety: the opening, the reveal and the close should each sound different from a routine beat. Speech-to-text cannot judge this; a person must.
 - Record in the story that tags were not verified as unspoken if the key has no speech-to-text permission.
 
+## Brand colors
+
+Do not hard-code colors. Before writing any card HTML, ripple, chapter label, or caption style, read the product's CSS — `globals.css`, CSS custom properties, or the marketing site's palette — and extract the brand colors. Write them as constants (or CSS variables on `:root`) so the entire demo uses the same palette. The tooling's defaults (`#0f766e` teal ripple, `#5eead4` accent) are placeholders; replace them.
+
+Typical tokens to extract: accent, accent-light, background, foreground, muted, card, card-border. Map them to:
+
+- **Ripple border and background:** accent, with 18 % opacity fill.
+- **Chapter label bold text:** accent-light.
+- **Card background:** background. Card heading `em` gradient: accent → accent-light. Card paragraph: muted.
+- **Caption bold:** accent-light.
+
+## Persona-driven narrative
+
+The narration is a story, not a feature tour. Before writing the beats:
+
+1. **Name a persona.** A role, a practice or company size, and a specific workload ("Lisa runs the front desk at a 3-clinician SLP practice, 25 patients, 6 payers").
+2. **Set a moment.** A day, time and trigger ("Monday morning, opens the priority queue").
+3. **Write from their point of view.** "Lisa has the full picture" — not "here you can see the full picture." Use their name once early, then "she" or "they."
+4. **End on their outcome.** What changed for the persona, then a CTA.
+
+A persona-driven narrative is dramatically more engaging than "this is the queue page, this is the patient page." It also forces the storyboard to cover the core workflow end-to-end, because the persona has a job to finish.
+
+## Silent beats (splash cards)
+
+A beat can have `text: null` in `script.mjs` to mark a silent beat — typically the opening splash and closing splash. Silent beats:
+
+- Are skipped by voice generation (no API call, no clip).
+- Use `SPLASH_DUR` (default 4.0 s) instead of clip duration for timing.
+- Are excluded from the mux audio filter chain (only voiced beats get `adelay` and `amix` inputs).
+
+The opening splash should be frame 1 of the video: show it before anything else, then log in behind it. This avoids dead time at the start.
+
+## Background music
+
+A soft instrumental track under the narration improves perceived quality. The muxer supports an optional background music file:
+
+- **Source:** Download a royalty-free track (Pixabay, Uppbeat, etc.) — do not generate synthetic ambient. Prefer "soft corporate" or "gentle piano" styles for product demos.
+- **Looping:** If the track is shorter than the video, crossfade-loop it with 2 s `acrossfade` at each join.
+- **Mix level:** −18 dB to −20 dB below narration (narration stays at 0 dB).
+- **Fades:** Fade in over the first 2 s, fade out over the last 3 s.
+- **License:** Record the track name, author, source URL, and license in the demo plan.
+
 ## Authoring the actions
 
 - Start from a clean state: clear storage once per run and apply any start state (for example a theme) through `start({ storage })`.
-- Use real clicks through the helper so the cursor moves and a ripple shows. Use stable selectors (`data-demo-*`, roles, labels). Avoid brittle text selectors.
+- Use real clicks through the helper so the cursor moves and a ripple shows.
+- **Prefer text-based Playwright locators** (`page.getByText()`, `page.getByRole()`, `page.getByLabel()`) over CSS class selectors. Many apps use CSS-in-JS, inline styles, or generated class names that change between builds. Text locators are resilient. Fall back to `data-demo-*` attributes when text is ambiguous, and to CSS selectors only as a last resort.
 - If the app scrolls inside a container, pass `scrollSelector`; scrolling the window does nothing.
 - Grant clipboard permission (the helper does) if a beat copies a link.
+- **Splash card as frame 1.** The T0 action should call `showCard()` immediately (before login or navigation), then log in behind the card. Record `cards.T0 = now()` and `starts.T0 = cards.T0` right after `showCard()`. This ensures the video opens on the branded card with no dead time.
 - Add a title card first (it is the first calibration anchor) and a closing card last (the second). Chapter labels at scene starts add more anchors.
 - Hotkeys must not fire while a field has focus; press them after a click on the page body.
 - If you edit source files while a Vite dev server runs and the served page looks stale, restart the server.
@@ -122,8 +167,39 @@ A flat read is a defect, not a neutral default. The narration must have intonati
 - Calibration reports at least two anchors and a slope near 1.0. Investigate a worst residual above 0.35 s.
 - Sample frames at several beat starts and mid-beat; each shows the screen the line talks about.
 - Measure speech onsets in the final audio (ffmpeg `silencedetect`) and compare with the placed times for several beats.
-- Clip loudness is comparable across beats.
+- Clip loudness is comparable across beats. No end-of-clip blips (the fade-out should have removed them).
+- If background music is present: it is audible but does not compete with narration; loop joins are not noticeable; fade-in and fade-out are smooth.
 - A person has listened to it at least once and judged that the delivery has intonation (no flat read, a clear contrast at the "so what" beat). Record what the tooling could not verify (for example that no direction tag was spoken).
+
+## Embedding the video
+
+A self-hosted mp4 with a click-to-play overlay is the simplest and fastest embed for a marketing site or landing page. No YouTube or Vimeo dependency, no third-party tracking, no iframe.
+
+Pattern (React / Next.js example):
+
+```jsx
+function DemoVideo() {
+  const ref = useRef(null)
+  const [playing, setPlaying] = useState(false)
+  function toggle() {
+    const v = ref.current
+    if (!v) return
+    v.paused ? (v.play(), setPlaying(true)) : (v.pause(), setPlaying(false))
+  }
+  return (
+    <div onClick={toggle} className="relative cursor-pointer overflow-hidden rounded-2xl border">
+      <video ref={ref} src="/demo.mp4" playsInline onEnded={() => setPlaying(false)} />
+      {!playing && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+          <PlayIcon />
+        </div>
+      )}
+    </div>
+  )
+}
+```
+
+Place the video in the hero section between the CTA and trust badges, or in a dedicated "See How It Works" section. Copy the mp4 to `public/demo.mp4`. Consider adding a poster frame (`poster="/demo-poster.jpg"`) extracted from the splash card for a preview before playback.
 
 ## Privacy and approvals
 

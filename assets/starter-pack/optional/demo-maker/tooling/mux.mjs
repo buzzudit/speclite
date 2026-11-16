@@ -30,7 +30,7 @@ function risingEdges(series, dark, bright, after = 0) {
   return edges
 }
 
-export function mux(video, timings, name = `${NAME}-${VERSION}`) {
+export function mux(video, timings, name = `${NAME}-${VERSION}`, { bgMusic = null, bgVolume = '-20dB' } = {}) {
   const { starts, cards, chapters } = timings
   const full = frames(video, 'scale=160:-1')
   const cardEdges = risingEdges(full, 60, 120)
@@ -60,32 +60,51 @@ export function mux(video, timings, name = `${NAME}-${VERSION}`) {
   const worst = Math.max(...resid.map(Math.abs))
   if (worst > 0.35) console.warn(`WARNING: worst anchor residual ${worst.toFixed(2)}s`)
 
-  const lastClip = duration(clipPath(beats[beats.length - 1]))
-  const total = Math.max(0, a * starts.E1 + b) + lastClip + 2.5
+  const voicedBeats = beats.filter(bt => bt.text)
+  const lastVoiced = voicedBeats[voicedBeats.length - 1]
+  const lastClip = duration(clipPath(lastVoiced))
+  const total = Math.max(0, a * starts[lastVoiced.id] + b) + lastClip + 2.5
   const out = path.resolve('tour/out', `${name}.mp4`)
   const inputs = ['-i', video]
   const filters = []
   const placed = {}
-  beats.forEach((bt, i) => {
+  let audioIdx = 0
+  for (const bt of voicedBeats) {
     inputs.push('-i', clipPath(bt))
     const at = Math.max(0, a * starts[bt.id] + b)
     placed[bt.id] = at
     const ms = Math.round(at * 1000)
-    filters.push(`[${i + 1}:a]adelay=${ms}|${ms}[a${i}]`)
-  })
-  const mix = beats.map((_, i) => `[a${i}]`).join('') + `amix=inputs=${beats.length}:dropout_transition=0:normalize=0[a]`
+    filters.push(`[${audioIdx + 1}:a]adelay=${ms}|${ms}[a${audioIdx}]`)
+    audioIdx++
+  }
+
+  // Optional background music: loop, attenuate, fade in/out
+  let mixLabel = '[a]'
+  if (bgMusic && fs.existsSync(bgMusic)) {
+    inputs.push('-stream_loop', '-1', '-i', bgMusic)
+    const bgIdx = audioIdx + 1
+    const fadeOutStart = Math.max(0, total - 3)
+    filters.push(`[${bgIdx}:a]volume=${bgVolume},afade=t=in:st=0:d=2,afade=t=out:st=${fadeOutStart.toFixed(2)}:d=3,atrim=0:${total.toFixed(2)}[bg]`)
+    const voiceMix = voicedBeats.map((_, i) => `[a${i}]`).join('') + `amix=inputs=${voicedBeats.length}:dropout_transition=0:normalize=0[voice]`
+    filters.push(voiceMix)
+    filters.push('[voice][bg]amix=inputs=2:dropout_transition=0:normalize=0[a]')
+  } else {
+    const mix = voicedBeats.map((_, i) => `[a${i}]`).join('') + `amix=inputs=${voicedBeats.length}:dropout_transition=0:normalize=0[a]`
+    filters.push(mix)
+  }
+
   const m = spawnSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', ...inputs,
-    '-filter_complex', filters.join(';') + ';' + mix,
+    '-filter_complex', filters.join(';'),
     '-map', '0:v', '-map', '[a]', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '20', '-preset', 'medium',
     '-c:a', 'aac', '-b:a', '160k', '-movflags', '+faststart', '-t', total.toFixed(2), out], { encoding: 'utf8', maxBuffer: 1 << 28 })
   if (m.status !== 0) throw new Error('ffmpeg mux failed: ' + m.stderr)
   fs.writeFileSync(`tour/out/placed-${VERSION}.json`, JSON.stringify(placed, null, 2))
-  const lastEnd = placed.E1 + duration(clipPath(beats[beats.length - 1]))
+  const lastEnd = placed[lastVoiced.id] + lastClip
   console.log(`mp4: ${out}  length ${duration(out).toFixed(1)}s; last line ends at ${lastEnd.toFixed(1)}s`)
   return out
 }
 
-if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, '/')}`) {
+if (process.argv[1] && import.meta.url === `file:///${process.argv[1].replace(/\\/g, '/')}`) {
   const timings = JSON.parse(fs.readFileSync(`tour/out/timings-${VERSION}.json`, 'utf8'))
   mux(path.resolve(`tour/out/${NAME}-${VERSION}.webm`), timings)
 }
