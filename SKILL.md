@@ -105,6 +105,7 @@ Use these module rules:
 - Heuristic Evaluation module: add `.claude/skills/heuristic-evaluation/` (SKILL.md) when the project needs structured UX review. A 12-heuristic framework: the NNG 10, a Human-Centered AI heuristic, and a Product-Market Alignment heuristic for startups and early-stage products. Pairs well with the Scenario Mould — both use the same 0–4 severity scale.
 - Skill Builder module: add `.claude/skills/skill-builder/` (SKILL.md, references, scripts, schemas, templates) when the user wants to encode a methodology, playbook, or domain expertise as a reusable Claude Code skill. The builder interviews the author, auto-gathers provenance (academic and industry), generates typed ports for composition, scaffolds verification scripts, and produces a complete skill package. Invoke with `/skill-builder`.
 - Codebase Audit module: add `.claude/skills/codebase-audit/` (SKILL.md, references, scripts) when the project needs adversarial code review before launch, a periodic security/quality sweep, or verification that planning docs match the code. A 7-lens framework (authorization, input integrity, secrets, error handling, architecture, doc coherence, compliance claims) with deterministic collector scripts and a structured report. If the project already has a project-specific codebase-audit skill, do not overwrite it — the generic version is a starting point that projects customize.
+- Design System Reference module: offer when the design module is active and the repo contains a CSS file with custom properties (`--color-*`, `--radius-*`, `--font-*` or equivalent). Generates a standalone HTML page (`design-system.html`) that extracts and renders the project's actual tokens, typography, components, and patterns in tabbed sections. One-shot generation, not a recurring skill — use the prompt at `assets/starter-pack/optional/design-system-reference/prompts/generate-design-system.md`. Ask the user before generating; preview the page in the browser after.
 
 If the user asks for a minimal setup, the safe fallback is core only.
 
@@ -261,6 +262,8 @@ Starter templates live here:
 - `assets/skill-builder/templates/` (shape templates for session-flow, reference, one-shot, recurring-check; deliverable templates; verification script templates)
 
 - `assets/starter-pack/optional/codebase-audit/` (complete Claude Code skill: `SKILL.md`, `references/` with severity, report-format, lens-checklists; `scripts/` with collect_inventory.py, check_auth_coverage.py, check_doc_coherence.py, grep_risk_patterns.sh)
+
+- `assets/starter-pack/optional/design-system-reference/prompts/generate-design-system.md` (one-shot generation prompt: extracts tokens, typography, components, and patterns from a project's CSS into a standalone HTML reference page)
 
 Use these as starting points, not immutable output. Replace placeholders such as `{{PROJECT_NAME}}`, `{{PROJECT_TYPE}}`, and `{{PRIMARY_USER}}`.
 
