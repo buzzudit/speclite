@@ -12,3 +12,4 @@
 - Update `progress.md` when project direction, active work, or status materially changes.
 - Prefer adapting coherent existing conventions over replacing them.
 - Every completed task response should end with **Up Next** and 1-3 concrete recommended next actions.
+- **Story writing in plan mode:** When asked to write a story, ask 9–12 discovery questions one by one (unless the user specifies otherwise). Only write the story file and update `stories/index.md` — do not begin implementation unless explicitly asked.
